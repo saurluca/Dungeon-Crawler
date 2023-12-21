@@ -1,5 +1,5 @@
 from random import randint, choice
-from algoviz.svg import SVGView
+from algoviz.svg import SVGView, Rect, Circle
 from Hero import Hero
 
 
@@ -10,13 +10,12 @@ class Maze:
         self.tile_size = 20
 
         self.maze = []
-        self.view = SVGView(size_x * self.tile_size + self.border * 2, size_y * self.tile_size + self.border * 2, "Maze in a haze")
-        generate_maze()
+        self.view = SVGView(tile_num_x * self.tile_size, tile_num_y * self.tile_size, "Maze in a haze")
+        self.generate_maze()
 
-        self.static_board = [[0 for i in range(size_x)] for _ in range(size_y)]
-        self.base = Rect(0, 0, size_x * self.tile_size + self.border * 2, size_y * self.tile_size + self.border * 2, self.view)
-        initial_render()
-
+        self.static_board = [[0 for i in range(tile_num_x)] for _ in range(tile_num_y)]
+        self.base = Rect(0, 0, tile_num_x * self.tile_size, tile_num_y * self.tile_size, self.view)
+        self.initial_render()
 
     # generates a maze using prims algorithm
     # "#" represents a wall, "." a free tile
@@ -88,7 +87,7 @@ class Maze:
         return self.maze
 
     def move_object_by(self, x, y, x_direction, y_direction):
-        self.maze[y+y_direction][x+x_direction] = self.maze[y][x]
+        self.maze[y + y_direction][x + x_direction] = self.maze[y][x]
         self.maze[y][x] = "."
 
     def initial_render(self):
