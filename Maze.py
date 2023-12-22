@@ -13,9 +13,14 @@ class Maze:
         self.view = SVGView(tile_num_x * self.tile_size, tile_num_y * self.tile_size, "Maze in a haze")
         self.generate_maze()
 
+        self.free_tiles = []
+        self.set_free_tiles()
+
         self.static_board = [[0 for i in range(tile_num_x)] for _ in range(tile_num_y)]
         self.base = Rect(0, 0, tile_num_x * self.tile_size, tile_num_y * self.tile_size, self.view)
+        print("start render")
         self.initial_render()
+        print("finish render")
 
     # generates a maze using prims algorithm
     # "#" represents a wall, "." a free tile
@@ -70,6 +75,15 @@ class Maze:
 
         self.maze = maze
 
+    def set_free_tiles(self):
+        for y in range(self.tile_num_y):
+            for x in range(self.tile_num_x):
+                if self.maze[y][x] == ".":
+                    self.free_tiles.append((x, y))
+
+    def get_free_tiles(self):
+        return self.free_tiles
+
     # outputs the maze in the console as a string
     def print_out(self):
         for lines in self.maze:
@@ -97,6 +111,8 @@ class Maze:
         for y in range(self.tile_num_y):
             for x in range(self.tile_num_x):
                 if self.maze[y][x] == ".":
-                    print("hello")
                     self.static_board[y][x] = Rect(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size, self.view)
                     self.static_board[y][x].set_fill_rgb(*gray)
+
+    def get_grid(self):
+        return self.maze
