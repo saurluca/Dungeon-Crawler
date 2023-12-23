@@ -1,5 +1,4 @@
 from random import randint, choice
-from algoviz.svg import SVGView, Rect, Circle
 from time import time
 
 
@@ -14,16 +13,16 @@ class Maze:
         self.free_tiles = []
         self.set_free_tiles()
 
-        # drawing
-        self.tile_size = 20
-        self.static_board = [[0 for i in range(tile_num_x)] for _ in range(tile_num_y)]
-        self.view = SVGView(tile_num_x * self.tile_size, tile_num_y * self.tile_size, "Maze in a haze")
-        # background used as wall
-        self.base = Rect(0, 0, tile_num_x * self.tile_size, tile_num_y * self.tile_size, self.view)
+        # # drawing
+        # self.tile_size = 20
+        # self.static_board = [[0 for i in range(tile_num_x)] for _ in range(tile_num_y)]
+        # self.view = SVGView(tile_num_x * self.tile_size, tile_num_y * self.tile_size, "Maze in a haze")
+        # # background used as wall
+        # self.base = Rect(0, 0, tile_num_x * self.tile_size, tile_num_y * self.tile_size, self.view)
 
         print("start render")
         start_time = time()
-        self.initial_render()
+        # self.initial_render()
         print(time()-start_time)
         print("finish render")
 
@@ -96,8 +95,8 @@ class Maze:
     def get_a_free_tile(self):
         return choice(self.get_free_tiles())
 
-    def get_view(self):
-        return self.view
+    # def get_view(self):
+    #     return self.view
 
     def set_tile(self, x, y, object):
         self.grid[y][x] = object
@@ -114,12 +113,12 @@ class Maze:
             print("")
 
     # very slow, why??
-    def initial_render(self):
-        gray = (143, 143, 143)
-
-        # render tiles, walls are the background
-        for y in range(self.tile_num_y):
-            for x in range(self.tile_num_x):
-                if self.grid[y][x] == ".":
-                    self.static_board[y][x] = Rect(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size, self.view)
-                    self.static_board[y][x].set_fill_rgb(*gray)
+    # def initial_render(self):
+    #     gray = (143, 143, 143)
+    #
+    #     # render tiles, walls are the background
+    #     for y in range(self.tile_num_y):
+    #         for x in range(self.tile_num_x):
+    #             if self.grid[y][x] == ".":
+    #                 self.static_board[y][x] = Rect(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size, self.view)
+    #                 self.static_board[y][x].set_fill_rgb(*gray)
