@@ -1,6 +1,4 @@
 from random import randint, choice
-from algoviz.svg import SVGView, Rect, Circle
-from time import time
 
 
 class Maze:
@@ -14,19 +12,6 @@ class Maze:
         self.free_tiles = []
         self.set_free_tiles()
 
-        # drawing
-        self.tile_size = 20
-        self.static_board = [[0 for i in range(tile_num_x)] for _ in range(tile_num_y)]
-        self.view = SVGView(tile_num_x * self.tile_size, tile_num_y * self.tile_size, "Maze in a haze")
-        # background used as wall
-        self.base = Rect(0, 0, tile_num_x * self.tile_size, tile_num_y * self.tile_size, self.view)
-
-        print("start render")
-        start_time = time()
-        self.initial_render()
-        print(time()-start_time)
-        print("finish render")
-
     def __call__(self, x, y):
         return self.grid[y][x]
 
@@ -34,10 +19,10 @@ class Maze:
     # "#" represents a wall, "." a free tile
     def generate_maze(self):
         # sets up a grid full of walls
-        grid = [["#" for i in range(self.tile_num_x)] for _ in range(self.tile_num_y)]
+        grid = [["#" for i in range(self.tile_num_x - 2)] for _ in range(self.tile_num_y - 2)]
 
         # sets one cell as open, that is not on the edge
-        pos = [randint(1, self.tile_num_y - 2), randint(1, self.tile_num_x - 2)]
+        pos = [randint(1, self.tile_num_y - 4), randint(1, self.tile_num_x - 4)]
         grid[pos[0]][pos[1]] = "."
 
         # list of walls adjacent to an open cells, that need to be looked at
@@ -53,7 +38,7 @@ class Maze:
             neighbors = 0
 
             # checks for number of neighboring open cells
-            if y < self.tile_num_y - 1:
+            if y < self.tile_num_y - 3:
                 lst.append([y + 1, x])
                 if grid[y + 1][x] == ".":
                     neighbors += 1
@@ -63,7 +48,7 @@ class Maze:
                 if grid[y - 1][x] == ".":
                     neighbors += 1
 
-            if x < self.tile_num_x - 1:
+            if x < self.tile_num_x - 3:
                 lst.append([y, x + 1])
                 if grid[y][x + 1] == ".":
                     neighbors += 1
@@ -81,7 +66,19 @@ class Maze:
 
             frontier_lst.remove(cell)
 
-        self.grid = grid
+        # improve step of adding the border !!
+
+        # Create the new grid with borders
+        border_grid = ['#' * self.tile_num_x]  # Adds the top border
+
+        # Add left and right borders to the original grid rows
+        for row in grid:
+            border_grid.append('#' + ''.join(row) + '#')
+
+        border_grid += ['#' * self.tile_num_x]  # Adds the bottom border
+
+        # converts it back to a list of separate strings
+        self.grid = [list(row) for row in border_grid]
 
     def set_free_tiles(self):
         for y in range(self.tile_num_y):
@@ -96,11 +93,8 @@ class Maze:
     def get_a_free_tile(self):
         return choice(self.get_free_tiles())
 
-    def get_view(self):
-        return self.view
-
-    def set_tile(self, x, y, object):
-        self.grid[y][x] = object
+    def set_tile(self, x, y, thing):
+        self.grid[y][x] = thing
 
     def move_object_by(self, x, y, x_direction, y_direction):
         self.grid[y + y_direction][x + x_direction] = self.grid[y][x]
@@ -112,14 +106,3 @@ class Maze:
             for tile in lines:
                 print(tile, end="")
             print("")
-
-    # very slow, why??
-    def initial_render(self):
-        gray = (143, 143, 143)
-
-        # render tiles, walls are the background
-        for y in range(self.tile_num_y):
-            for x in range(self.tile_num_x):
-                if self.grid[y][x] == ".":
-                    self.static_board[y][x] = Rect(x * self.tile_size, y * self.tile_size, self.tile_size, self.tile_size, self.view)
-                    self.static_board[y][x].set_fill_rgb(*gray)
