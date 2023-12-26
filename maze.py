@@ -106,3 +106,7 @@ class Maze:
             for tile in lines:
                 print(tile, end="")
             print("")
+
+    # currently only checking for walls
+    def check_obstacle(self, x, y):
+        return not self.grid[y][x] == "#"
