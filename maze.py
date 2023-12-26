@@ -12,6 +12,8 @@ class Maze:
         self.free_tiles = []
         self.set_free_tiles()
 
+        self.generate_stair()
+
     def __call__(self, x, y):
         return self.grid[y][x]
 
@@ -19,7 +21,7 @@ class Maze:
     # "#" represents a wall, "." a free tile
     def generate_maze(self):
         # sets up a grid full of walls
-        grid = [["#" for i in range(self.tile_num_x - 2)] for _ in range(self.tile_num_y - 2)]
+        grid = [["#" for _ in range(self.tile_num_x - 2)] for _ in range(self.tile_num_y - 2)]
 
         # sets one cell as open, that is not on the edge
         pos = [randint(1, self.tile_num_y - 4), randint(1, self.tile_num_x - 4)]
@@ -110,3 +112,7 @@ class Maze:
     # currently only checking for walls
     def check_obstacle(self, x, y):
         return not self.grid[y][x] == "#"
+
+    def generate_stair(self):
+        x, y = self.get_a_free_tile()
+        self.grid[y][x] = "S"

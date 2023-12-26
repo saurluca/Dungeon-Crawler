@@ -2,6 +2,7 @@ import arcade
 from random import choice
 from maze import Maze
 from helper import get_line
+import time
 
 tile_num_x = 20
 tile_num_y = 20
@@ -16,7 +17,7 @@ screen_height = tile_num_y * tile_size
 
 # either move smooth, half tile or full tile, change update time as well
 player_movement_speed = tile_size
-view_range = 2
+view_range = 3
 
 
 class Game(arcade.Window):
@@ -24,6 +25,7 @@ class Game(arcade.Window):
         super().__init__(screen_width, screen_height, screen_title)
 
         self.maze = None
+
         self.uncovered_tiles = None
         self.new_tiles = None
         self.view_range_mask = None
@@ -32,6 +34,8 @@ class Game(arcade.Window):
         self.player_sprite = None
 
         self.physics_engine = None
+
+        self.start_time = None
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
@@ -46,19 +50,22 @@ class Game(arcade.Window):
         self.scene = arcade.Scene()
         self.scene.add_sprite_list("Floor", use_spatial_hash=True)
         self.scene.add_sprite_list("Walls", use_spatial_hash=True)
+        self.scene.add_sprite_list("Stairs", use_spatial_hash=True)
         self.scene.add_sprite_list("Player")
 
         # renders the hero
         x, y = self.maze.get_a_free_tile()
         self.player_sprite = arcade.Sprite("Tiles/tile_0098.png", character_scaling)
-        self.player_sprite.center_x = x * tile_size + tile_size / 2
-        self.player_sprite.center_y = y * tile_size + tile_size / 2
+        self.player_sprite.center_x = x * tile_size + tile_size // 2
+        self.player_sprite.center_y = y * tile_size + tile_size // 2
         self.scene.add_sprite("Player", self.player_sprite)
 
         self.check_field_of_view()
         self.render_new_tiles()
 
         self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite, self.scene.get_sprite_list("Walls"))
+
+        self.start_time = time.time()
 
     def create_view_range_mask(self):
         mask = []
@@ -92,7 +99,7 @@ class Game(arcade.Window):
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.player_sprite.change_x = 0
 
-    # somewhere index out of range, also make more efficient, also fucking diagonals
+    # TODO: make more efficient, also fucking diagonals
     def check_field_of_view(self):
         # hero position in the main grid
         cx = int(self.player_sprite.center_x / tile_size)
@@ -107,12 +114,11 @@ class Game(arcade.Window):
                 # center of hero x + (vector of center hero to view range grid)
                 abs_x = cx + (x - rx)
                 abs_y = cy + (y - ry)
-                # checks if in circular view range and if in bound of grid and that the block is in line of sight
-                if self.view_range_mask[y][x] and self.in_bound(abs_x, abs_y) and self.check_block_visible(cx, cy, rx, ry, x, y):
-                    # checks block not seen before
-                    if not self.uncovered_tiles[abs_x][abs_y]:
-                        new_tiles.append((abs_x, abs_y))
-                        self.uncovered_tiles[abs_x][abs_y] = True
+                # checks if in circular view range and if in bound of grid and that the block is in line of sight and block not seen before
+                if self.view_range_mask[y][x] and self.in_bound(abs_x, abs_y) and self.check_block_visible(cx, cy, rx, ry, x, y) and not \
+                        self.uncovered_tiles[abs_x][abs_y]:
+                    new_tiles.append((abs_x, abs_y))
+                    self.uncovered_tiles[abs_x][abs_y] = True
 
         self.new_tiles = new_tiles
 
@@ -124,6 +130,7 @@ class Game(arcade.Window):
                 return False
         return True
         #   and point != (rx, ry):
+
     def in_bound(self, x, y):
         return 0 <= x < tile_num_x and 0 <= y < tile_num_y
 
@@ -143,6 +150,12 @@ class Game(arcade.Window):
                 floor.center_x = x * tile_size + tile_size / 2
                 floor.center_y = y * tile_size + tile_size / 2
                 self.scene.add_sprite("Floor", floor)
+            elif self.maze(x, y) == "S":
+                stair_texture = "Tiles/tile_0039.png"
+                stair = arcade.Sprite(stair_texture, tile_scaling)
+                stair.center_x = x * tile_size + tile_size // 2
+                stair.center_y = y * tile_size + tile_size // 2
+                self.scene.add_sprite("Stairs", stair)
 
     def on_draw(self):
         arcade.start_render()
@@ -154,6 +167,13 @@ class Game(arcade.Window):
 
         self.check_field_of_view()
         self.render_new_tiles()
+
+        cx = int(self.player_sprite.center_x / tile_size)
+        cy = int(self.player_sprite.center_y / tile_size)
+
+        if self.maze(cx, cy) == "S":
+            print(f"It took you {time.time() - self.start_time} seconds")
+            self.setup()
 
 
 def main():
