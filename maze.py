@@ -61,6 +61,8 @@ class Maze:
                 if grid[y][x - 1] == ".":
                     neighbors += 1
 
+
+
             # if that wall has exactly one neighbour, make it an open cell
             # and at it's neighboring walls to the frontier list
             if neighbors == 1:

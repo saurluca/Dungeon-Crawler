@@ -8,6 +8,7 @@ import time
 tile_num_x = 25
 tile_num_y = 25
 
+# TODO because of this character slightly smaller then tiles
 character_scaling = 1.8
 tile_scaling = 2.0
 coin_scaling = 1.4
@@ -96,7 +97,7 @@ class Game(arcade.Window):
 
         self.start_time = time.time()
         # for some reason big loading time
-        # arcade.play_sound(self.start_sound)
+        arcade.play_sound(self.start_sound, volume=0.5)
 
     def create_view_range_mask(self):
         mask = []
@@ -110,6 +111,7 @@ class Game(arcade.Window):
             mask.append(row)
         self.view_range_mask = mask
 
+    # TODO on short press loses input sometimes
     def on_key_press(self, key, modifiers):
         if key == arcade.key.UP or key == arcade.key.W:
             self.player_sprite.change_y = player_movement_speed
@@ -137,11 +139,11 @@ class Game(arcade.Window):
         # Don't let camera travel past 0 or past border
         if screen_center_x < 0:
             screen_center_x = 0
+        elif screen_center_x > tile_num_x * tile_size - screen_width:
+            screen_center_x = tile_num_x * tile_size - screen_width
         if screen_center_y < 0:
             screen_center_y = 0
-        if screen_center_x > tile_num_x * tile_size - screen_width:
-            screen_center_x = tile_num_x * tile_size - screen_width
-        if screen_center_y > tile_num_y * tile_size - screen_height:
+        elif screen_center_y > tile_num_y * tile_size - screen_height:
             screen_center_y = tile_num_y * tile_size - screen_height
 
         player_centered = screen_center_x, screen_center_y
@@ -195,6 +197,7 @@ class Game(arcade.Window):
             if self.maze(x, y) == "c":
                 coin = "Tiles/tile_0003.png"
                 self.set_texture(coin, "Coins", x, y, coin_scaling)
+            # TODO better stair texture
             elif self.maze(x, y) == "S":
                 stair_texture = "Tiles/tile_0039.png"
                 self.set_texture(stair_texture, "Stairs", x, y)
