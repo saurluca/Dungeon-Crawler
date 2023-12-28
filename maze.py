@@ -15,8 +15,9 @@ class Maze:
         self.generate_stair()
 
     def __call__(self, x, y):
-        return self.grid[y][x]
+        return str(self.grid[y][x])
 
+    # TODO improv maze gen, no diagonal walls
     # generates a grid using prims algorithm
     # "#" represents a wall, "." a free tile
     def generate_maze(self):
@@ -88,12 +89,11 @@ class Maze:
                 if self.grid[y][x] == ".":
                     self.free_tiles.append((x, y))
 
-    def get_free_tiles(self):
-        self.set_free_tiles()
-        return self.free_tiles
-
+    # TODO for generation of things, not complete random, eg not in hero view range
     def get_a_free_tile(self):
-        return choice(self.get_free_tiles())
+        free_tile = choice(self.free_tiles)
+        self.free_tiles.remove(free_tile)
+        return free_tile
 
     def set_tile(self, x, y, thing):
         self.grid[y][x] = thing
@@ -113,6 +113,7 @@ class Maze:
     def check_obstacle(self, x, y):
         return not self.grid[y][x] == "#"
 
+    # TODO should not be in maze
     def generate_stair(self):
         x, y = self.get_a_free_tile()
         self.grid[y][x] = "S"
