@@ -1,7 +1,7 @@
 from maze import Maze
 from hero import Hero
 
-
+# TODO put generation into level class
 class Level:
     def __init__(self, tile_num_x, tile_num_y):
         self.tile_num_x = tile_num_x
