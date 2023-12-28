@@ -25,51 +25,52 @@ class Maze:
         grid = [["#" for _ in range(self.tile_num_x - 2)] for _ in range(self.tile_num_y - 2)]
 
         # sets one cell as open, that is not on the edge
-        pos = [randint(1, self.tile_num_y - 4), randint(1, self.tile_num_x - 4)]
-        grid[pos[0]][pos[1]] = "."
+        (start_y, start_x) = (randint(1, self.tile_num_y - 4), randint(1, self.tile_num_x - 4))
+        grid[start_y][start_x] = "."
 
         # list of walls adjacent to an open cells, that need to be looked at
-        frontier_lst = [[pos[0] + 1, pos[1]], [pos[0] - 1, pos[1]], [pos[0], pos[1] + 1], [pos[0], pos[1] - 1]]
+        frontier_lst = [(start_y + 1, start_x), (start_y - 1, start_x), (start_y, start_x + 1), (start_y, start_x - 1)]
 
         # checks a wall in frontier list
         while frontier_lst:
             # chooses a random cell/wall from the frontier list
-            cell = choice(frontier_lst)
-            y = cell[0]
-            x = cell[1]
-            lst = []
+            y, x = choice(frontier_lst)
             neighbors = 0
+            diagonals = 0
+
+            def check(y, x, value):
+                if 0 <= y < self.tile_num_y - 3 and 0 <= x < self.tile_num_x - 3:
+                    if grid[y][x] == value:
+                        return True
+                return False
 
             # checks for number of neighboring open cells
-            if y < self.tile_num_y - 3:
-                lst.append([y + 1, x])
-                if grid[y + 1][x] == ".":
+            for (dy, dx) in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                new_y, new_x = y + dy, x + dx
+                if check(new_y, new_x, "."):
                     neighbors += 1
 
-            if y > 0:
-                lst.append([y - 1, x])
-                if grid[y - 1][x] == ".":
-                    neighbors += 1
-
-            if x < self.tile_num_x - 3:
-                lst.append([y, x + 1])
-                if grid[y][x + 1] == ".":
-                    neighbors += 1
-
-            if x > 0:
-                lst.append([y, x - 1])
-                if grid[y][x - 1] == ".":
-                    neighbors += 1
-
-
+            # check diagonals
+            for (dy, dx) in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+                new_y, new_x = y + dy, x + dx
+                if check(new_y, new_x, "."):
+                    connected = False
+                    for (cy, cx) in [(new_y, x), (y, new_x)]:
+                        if check(cy, cx, "."):
+                            connected = True
+                    if not connected:
+                        diagonals += 1
 
             # if that wall has exactly one neighbour, make it an open cell
             # and at it's neighboring walls to the frontier list
-            if neighbors == 1:
-                frontier_lst = frontier_lst + lst
+            if neighbors == 1 and diagonals == 0:
                 grid[y][x] = "."
+                for (dy, dx) in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    new_y, new_x = y + dy, x + dx
+                    if check(new_y, new_x, "#"):
+                        frontier_lst.append((new_y, new_x))
 
-            frontier_lst.remove(cell)
+            frontier_lst.remove((y, x))
 
         # improve step of adding the border !!
 
