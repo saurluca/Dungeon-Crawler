@@ -7,7 +7,7 @@ class Maze(MazeGenerator):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
 
-        self.grid = super().generate_prim_maze(tile_num_x, tile_num_y)
+        self.grid = super().generate_growing_tree_maze(tile_num_x, tile_num_y)
 
         self.free_tiles = []
         self.set_free_tiles()

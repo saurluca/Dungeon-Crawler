@@ -5,8 +5,8 @@ from hero import Hero
 from helper import get_line
 import time
 
-TILE_NUM_X = 25
-TILE_NUM_Y = 25
+TILE_NUM_X = 21
+TILE_NUM_Y = 21
 
 # TODO because of this character slightly smaller then tiles
 CHARACTER_SCALING = 1.8
@@ -15,11 +15,11 @@ COIN_SCALING = 1.4
 TILE_SIZE = 32
 
 SCREEN_TITLE = "Dungeon Crawler"
-SCREEN_WIDTH = 20 * TILE_SIZE
-SCREEN_HEIGHT = 20 * TILE_SIZE
+SCREEN_WIDTH = 21 * TILE_SIZE
+SCREEN_HEIGHT = 21 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = False
+I_SEE_EVERYTHING = True
 
 # either move smooth, half tile or full tile, change update time as well
 PLAYER_MOVEMENT_SPEED = TILE_SIZE
@@ -57,6 +57,7 @@ class Game(arcade.Window):
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
+    # TODO loading screen
     def setup(self):
         self.maze = Maze(TILE_NUM_X, TILE_NUM_Y)
 
