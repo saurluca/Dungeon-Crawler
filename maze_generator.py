@@ -23,7 +23,7 @@ def in_between(x1, y1, x2, y2):
 
 def generate_alternating_grid(tile_num_x, tile_num_y):
     grid = [["#" for _ in range(tile_num_y)]]
-    for x in range(tile_num_x-3):
+    for x in range(tile_num_x - 3):
         flip = True
         row = []
         for y in range(tile_num_y):
@@ -112,23 +112,27 @@ class MazeGenerator:
 
     # only uneven x and y num, otherwise ugly
     @staticmethod
-    def generate_growing_tree_maze(tile_num_x, tile_num_y):
+    def generate_growing_tree_maze(tile_num_x, tile_num_y, recursive_weight=3, random_weight=1):
         grid = generate_alternating_grid(tile_num_x, tile_num_y)
+        weights = [True for _ in range(recursive_weight)] + [False for _ in range(random_weight)]
 
-        # TODO implement start at a random position
+        # TODO implement start at a random position ?
         visited = [(1, 1)]
 
         # -2 because of wall border, // 2 + 1 to half it and round up, of x and y tiles
         num_free_tiles = ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
         i = 0
         not_found = 0
-        while i < num_free_tiles - 1:
-            # here change selection method of next cell
-            # this is similar to a recursive backtracking algorithm
-            current_cell = visited[-1 - not_found]
 
-            # this is similar to Prim's algorithm
-            # current_cell = choice(visited)
+        while i < num_free_tiles - 1:
+            # adjust weight of random vs backtracking
+            recursive = choice(weights)
+            if recursive:
+                # this is similar to a recursive backtracking algorithm
+                current_cell = visited[-1 - not_found]
+            else:
+                # this is similar to Prim's algorithm
+                current_cell = choice(visited)
 
             open_neighbors = check_unvisited_neighbors(current_cell, visited, tile_num_x, tile_num_y)
 
@@ -147,6 +151,6 @@ class MazeGenerator:
 
 if __name__ == '__main__':
     mg = MazeGenerator()
-    # mg.print_out(generate_alternating_grid(5, 5))
+    # mg.print_out(generate_alternating_grid(5, w5))
     grid = mg.generate_growing_tree_maze(7, 7)
     mg.print_out(grid)
