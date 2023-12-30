@@ -14,5 +14,5 @@ class Level:
         self.coin_count = None
 
     def set_up(self):
-        self.maze = Maze(self.tile_num_x, self.tile_num_y)
+        self.maze = Maze(self.tile_num_x, self.tile_num_y, 3, 1)
         self.hero = Hero(*self.maze.get_a_free_tile())

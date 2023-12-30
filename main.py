@@ -5,8 +5,8 @@ from hero import Hero
 from helper import get_line
 import time
 
-TILE_NUM_X = 21
-TILE_NUM_Y = 21
+TILE_NUM_X = 25
+TILE_NUM_Y = 25
 
 # TODO because of this character slightly smaller then tiles
 CHARACTER_SCALING = 1.8
@@ -15,8 +15,8 @@ COIN_SCALING = 1.4
 TILE_SIZE = 32
 
 SCREEN_TITLE = "Dungeon Crawler"
-SCREEN_WIDTH = 21 * TILE_SIZE
-SCREEN_HEIGHT = 21 * TILE_SIZE
+SCREEN_WIDTH = 25 * TILE_SIZE
+SCREEN_HEIGHT = 25 * TILE_SIZE
 
 # cheat mode for full vision
 I_SEE_EVERYTHING = True
@@ -59,7 +59,7 @@ class Game(arcade.Window):
 
     # TODO loading screen
     def setup(self):
-        self.maze = Maze(TILE_NUM_X, TILE_NUM_Y)
+        self.maze = Maze(TILE_NUM_X, TILE_NUM_Y, 1, 1)
 
         self.new_tiles = []
         self.uncovered_tiles = [[False for _ in range(TILE_NUM_Y)] for _ in range(TILE_NUM_X)]
@@ -227,17 +227,19 @@ class Game(arcade.Window):
         cx = int(self.player_sprite.center_x / TILE_SIZE)
         cy = int(self.player_sprite.center_y / TILE_SIZE)
 
+        # TODO for some reason executes this two times per collision
         # check for coin collision
         for coin in self.coin_sprites:
             if cx == int(coin.center_x / TILE_SIZE) and cy == int(coin.center_y / TILE_SIZE):
                 arcade.play_sound(self.collect_coin_sound)
                 self.coin_sprites.remove(coin)
+                print(self.score)
                 self.score += 1
 
         if self.maze(cx, cy) == "S":
             arcade.play_sound(self.win_sound)
             print(f"Time: {time.time() - self.start_time}")
-            print(f"Score: {self.score} / {NUM_COINS}")
+            print(f"Score: {self.score/2} / {NUM_COINS}")
             time.sleep(1.5)
             self.setup()
 

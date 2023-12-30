@@ -3,11 +3,11 @@ from maze_generator import MazeGenerator
 
 
 class Maze(MazeGenerator):
-    def __init__(self, tile_num_x=12, tile_num_y=12):
+    def __init__(self, tile_num_x=12, tile_num_y=12, recursive_weight=1, random_weight=1):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
 
-        self.grid = super().generate_growing_tree_maze(tile_num_x, tile_num_y)
+        self.grid = super().generate_growing_tree_maze(tile_num_x, tile_num_y, recursive_weight, random_weight)
 
         self.free_tiles = []
         self.set_free_tiles()

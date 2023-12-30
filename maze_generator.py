@@ -1,3 +1,4 @@
+import time
 from random import choice, randint
 
 
@@ -123,7 +124,6 @@ class MazeGenerator:
         num_free_tiles = ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
         i = 0
         not_found = 0
-
         while i < num_free_tiles - 1:
             # adjust weight of random vs backtracking
             recursive = choice(weights)
@@ -143,14 +143,51 @@ class MazeGenerator:
                 visited.append(next_cell)
                 i += 1
                 not_found = 0
-            else:
+            elif recursive:
                 not_found += 1
 
         return grid
 
 
-if __name__ == '__main__':
+def test_maze_gen_time_ratio():
     mg = MazeGenerator()
-    # mg.print_out(generate_alternating_grid(5, w5))
-    grid = mg.generate_growing_tree_maze(7, 7)
-    mg.print_out(grid)
+    time_lst = []
+    testing_num = 50
+    sample_values = ((1, 0), (0, 1), (1, 1), (2, 1), (1, 2), (3, 1), (1, 3), (3, 2), (2, 3))
+    for rr in sample_values:
+        start_time = time.time()
+        for i in range(testing_num):
+            mg.generate_growing_tree_maze(35, 35, *rr)
+        time_lst.append(time.time() - start_time)
+
+    print(sample_values)
+    print(time_lst)
+
+
+def test_maze_gen_time_size():
+    mg = MazeGenerator()
+    time_lst = []
+    testing_num = 50
+    for x in range(5, 55, 2):
+        start_time = time.time()
+        for i in range(testing_num):
+            mg.generate_growing_tree_maze(x, x, 1, 1, )
+        time_lst.append(time.time() - start_time)
+
+    print(time_lst)
+
+
+def test_maze_gen_time_one_size():
+    mg = MazeGenerator()
+    total_time = 0
+    testing_num = 50
+    for i in range(testing_num):
+        start_time = time.time()
+        mg.generate_growing_tree_maze(35, 35, 1, 1, )
+        total_time += time.time() - start_time
+
+    print(total_time / testing_num)
+
+
+if __name__ == '__main__':
+    test_maze_gen_time_size()
