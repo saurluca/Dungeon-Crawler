@@ -3,7 +3,7 @@ from maze_generator import MazeGenerator
 
 
 class Maze(MazeGenerator):
-    def __init__(self, tile_num_x=12, tile_num_y=12, recursive_weight=1, random_weight=1):
+    def __init__(self, tile_num_x=12, tile_num_y=12, recursive_weight=4, random_weight=1):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
 
