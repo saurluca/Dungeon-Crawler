@@ -35,6 +35,10 @@ class Game(arcade.Window):
 
         self.maze = None
 
+        self.hero = None
+        self.player_change_x = 0
+        self.player_change_y = 0
+
         # tiles already seen
         self.uncovered_tiles = None
 
@@ -58,6 +62,7 @@ class Game(arcade.Window):
         self.start_time = None
         self.time_text = None
 
+        # keeps track of coins collected
         self.score = 0
         self.score_text = None
 
@@ -69,10 +74,7 @@ class Game(arcade.Window):
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
-        self.player_change_x = 0
-        self.player_change_y = 0
-
-    # TODO loading screen
+    # TODO loading screen and or main menu
     def setup(self):
         # sets up and generates the maze
         self.maze = Maze(TILE_NUM_X, TILE_NUM_Y, 4, 1)
@@ -94,8 +96,10 @@ class Game(arcade.Window):
 
         self.coin_sprites = self.scene.get_sprite_list("Coins")
 
+        # instantiates the hero
         cx, cy = self.maze.get_a_free_tile()
-        self.maze.set_tile(cx, cy, Hero(cx, cy))
+        self.hero = Hero(cx, cy)
+        self.maze.set_tile(cx, cy, self.hero)
 
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
@@ -168,9 +172,9 @@ class Game(arcade.Window):
 
     # TODO change where and how cx and cy is saved
     # TODO move collision check with coins etc. here?
-    def move_player(self, cx, cy):
-        dx = self.player_change_x
-        dy = self.player_change_y
+    def move_player(self):
+        cx, cy = self.hero.get_position()
+        dx, dy = self.player_change_x, self.player_change_y
 
         if self.maze.check_obstacle(cx + dx, cy + dy):
             self.player_sprite.center_x += dx * TILE_SIZE
@@ -181,17 +185,18 @@ class Game(arcade.Window):
             self.player_sprite.center_y += dy * TILE_SIZE
 
     # TODO possible to check via maze?
-    def check_coin_collision(self, cx, cy):
+    # TODO find better way to remove coin
+    def check_coin_collision(self):
         for coin in self.coin_sprites:
-            if cx == int(coin.center_x / TILE_SIZE) and cy == int(coin.center_y / TILE_SIZE):
+            if self.hero.get_x() == int(coin.center_x / TILE_SIZE) and self.hero.get_y() == int(coin.center_y / TILE_SIZE):
                 # arcade.play_sound(self.collect_coin_sound)
                 self.coin_sprites.remove(coin)
                 # update score
                 self.score += 1
                 self.score_text.text = f"Score: {self.score} / {NUM_COINS}"
 
-    def check_stair_collision(self, cx, cy):
-        if self.maze(cx, cy) == "S":
+    def check_stair_collision(self):
+        if self.maze(self.hero.get_position()) == "S":
             # arcade.play_sound(self.win_sound)
             print(f"Total time: {round(time.time() - self.start_time, 1)}")
             print(f"Score: {self.score} / {NUM_COINS}")
@@ -217,7 +222,9 @@ class Game(arcade.Window):
         self.camera.move_to(player_centered)
 
     # TODO: make more efficient
-    def check_field_of_view(self, cx, cy):
+    def check_field_of_view(self):
+        cx, cy = self.hero.get_position()
+
         # hero position in the relative grid
         rx = VIEW_RANGE
         ry = VIEW_RANGE
@@ -295,18 +302,18 @@ class Game(arcade.Window):
         cy = int(self.player_sprite.center_y / TILE_SIZE)
 
         # updates player position
-        self.move_player(cx, cy)
+        self.move_player()
 
         self.center_camera_to_player()
 
-        self.check_field_of_view(cx, cy)
+        self.check_field_of_view()
 
         # adds new tiles to scene
         self.add_new_tiles()
 
         # collision checks
-        self.check_coin_collision(cx, cy)
-        self.check_stair_collision(cx, cy)
+        self.check_coin_collision()
+        self.check_stair_collision()
 
         # update time text
         self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
@@ -316,7 +323,7 @@ def main():
     window = Game()
     window.setup()
 
-    arcade.schedule(window.update_things, 1 / 10)
+    arcade.schedule(window.update_things, 1 / 8)
 
     arcade.run()
 
