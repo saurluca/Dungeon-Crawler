@@ -127,7 +127,8 @@ class Game(arcade.Window):
 
         self.score_text = arcade.Text(f"Score: {self.score} / {NUM_COINS}", 8, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 5 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
-        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8 + 20 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
+        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8 + 10 * TILE_SIZE, SCREEN_HEIGHT - 24,
+                                   arcade.csscolor.BLACK, 18)
 
         # TODO reduce big loading time
         # arcade.play_sound(self.start_sound, volume=0.5)
@@ -174,6 +175,7 @@ class Game(arcade.Window):
 
     # TODO change where and how cx and cy is saved
     # TODO move collision check with coins etc. here?
+    # TODO change position in grid?
     def move_player(self):
         cx, cy = self.hero.get_position()
         dx, dy = self.player_change_x, self.player_change_y
@@ -299,6 +301,7 @@ class Game(arcade.Window):
 
         self.score_text.draw()
         self.time_text.draw()
+        self.hp_text.draw()
 
     def update_things(self, delta_time):
         # updates player position
@@ -311,25 +314,23 @@ class Game(arcade.Window):
         # adds new tiles to scene
         self.add_new_tiles()
 
-        #TODO general collision check method?
+        # TODO general collision check method?
         # collision checks
         self.check_coin_collision()
         self.check_stair_collision()
-       # self.check_item_collision()
-
+        # self.check_item_collision()
 
         # update time text
         self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
         # TODO create hp view method
 
 
-
 def main():
     window = Game()
     window.setup()
-    window.maze.print_out()
+    # window.maze.print_out()
 
-    arcade.schedule(window.update_things, 1 / 10)
+    arcade.schedule(window.update_things, 1 / 8)
 
     arcade.run()
 

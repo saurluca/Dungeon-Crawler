@@ -9,6 +9,7 @@ class Character:
 
     def get_hp(self):
         return self.hp
+
     def get_max_hp(self):
         return self.max_hp
 
@@ -32,4 +33,3 @@ class Character:
 
     def set_position(self, new_x, new_y):
         self.x, self.y = new_x, new_y
-
