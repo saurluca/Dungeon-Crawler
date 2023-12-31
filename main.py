@@ -34,6 +34,7 @@ class Game(arcade.Window):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
         self.maze = None
+        self.hero = None
 
         # tiles already seen
         self.uncovered_tiles = None
@@ -95,7 +96,8 @@ class Game(arcade.Window):
         self.coin_sprites = self.scene.get_sprite_list("Coins")
 
         cx, cy = self.maze.get_a_free_tile()
-        self.maze.set_tile(cx, cy, Hero(cx, cy))
+        self.hero = Hero(cx, cy)
+        self.maze.set_tile(cx, cy, self.hero)
 
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
@@ -110,7 +112,7 @@ class Game(arcade.Window):
             self.maze.set_tile(x, y, "c")
 
         # checks initial field of view
-        self.check_field_of_view(cx, cy)
+        self.check_field_of_view()
         # renders these tiles
         self.add_new_tiles()
 
@@ -168,30 +170,33 @@ class Game(arcade.Window):
 
     # TODO change where and how cx and cy is saved
     # TODO move collision check with coins etc. here?
-    def move_player(self, cx, cy):
-        dx = self.player_change_x
-        dy = self.player_change_y
+    def move_player(self):
+        cx, cy = self.hero.get_position()
+        dx, dy = self.player_change_x, self.player_change_y
 
         if self.maze.check_obstacle(cx + dx, cy + dy):
             self.player_sprite.center_x += dx * TILE_SIZE
             self.player_sprite.center_y += dy * TILE_SIZE
+            self.hero.set_position(cx + dx, cy + dy)
         elif self.maze.check_obstacle(cx + dx, cy):
             self.player_sprite.center_x += dx * TILE_SIZE
+            self.hero.set_x(cx + dx)
         elif self.maze.check_obstacle(cx, cy + dy):
             self.player_sprite.center_y += dy * TILE_SIZE
+            self.hero.set_y(cy + dy)
 
     # TODO possible to check via maze?
-    def check_coin_collision(self, cx, cy):
+    def check_coin_collision(self):
         for coin in self.coin_sprites:
-            if cx == int(coin.center_x / TILE_SIZE) and cy == int(coin.center_y / TILE_SIZE):
+            if self.hero.get_x() == int(coin.center_x / TILE_SIZE) and self.hero.get_y() == int(coin.center_y / TILE_SIZE):
                 # arcade.play_sound(self.collect_coin_sound)
                 self.coin_sprites.remove(coin)
                 # update score
                 self.score += 1
                 self.score_text.text = f"Score: {self.score} / {NUM_COINS}"
 
-    def check_stair_collision(self, cx, cy):
-        if self.maze(cx, cy) == "S":
+    def check_stair_collision(self):
+        if self.maze(*self.hero.get_position()) == "S":
             # arcade.play_sound(self.win_sound)
             print(f"Total time: {round(time.time() - self.start_time, 1)}")
             print(f"Score: {self.score} / {NUM_COINS}")
@@ -217,7 +222,7 @@ class Game(arcade.Window):
         self.camera.move_to(player_centered)
 
     # TODO: make more efficient
-    def check_field_of_view(self, cx, cy):
+    def check_field_of_view(self):
         # hero position in the relative grid
         rx = VIEW_RANGE
         ry = VIEW_RANGE
@@ -226,10 +231,10 @@ class Game(arcade.Window):
         for y in range(VIEW_RANGE * 2 + 1):
             for x in range(VIEW_RANGE * 2 + 1):
                 # center of hero x + (vector of center hero to view range grid)
-                abs_x = cx + (x - rx)
-                abs_y = cy + (y - ry)
+                abs_x = self.hero.get_x() + (x - rx)
+                abs_y = self.hero.get_y() + (y - ry)
                 # checks if in circular view range, if in bound of grid, that the block is in line of sight, block not seen before
-                if self.view_range_mask[y][x] and self.in_bound(abs_x, abs_y) and self.check_block_visible(cx, cy, rx, ry, x, y) and not \
+                if self.view_range_mask[y][x] and self.in_bound(abs_x, abs_y) and self.check_block_visible(rx, ry, x, y) and not \
                         self.uncovered_tiles[abs_x][abs_y]:
                     new_tiles.append((abs_x, abs_y))
                     self.uncovered_tiles[abs_x][abs_y] = True
@@ -237,7 +242,8 @@ class Game(arcade.Window):
         self.new_tiles = new_tiles
 
     # calculates line approximation and checks if sight is blocked along the line
-    def check_block_visible(self, cx, cy, rx, ry, x, y):
+    def check_block_visible(self, rx, ry, x, y):
+        cx, cy = self.hero.get_position()
         s = get_line((rx, ry), (x, y))
         for point in s:
             if not self.maze.check_obstacle(cx + point[0] - rx, cy + point[1] - ry) and point != (x, y):
@@ -291,22 +297,19 @@ class Game(arcade.Window):
         self.time_text.draw()
 
     def update_things(self, delta_time):
-        cx = int(self.player_sprite.center_x / TILE_SIZE)
-        cy = int(self.player_sprite.center_y / TILE_SIZE)
-
         # updates player position
-        self.move_player(cx, cy)
+        self.move_player()
 
         self.center_camera_to_player()
 
-        self.check_field_of_view(cx, cy)
+        self.check_field_of_view()
 
         # adds new tiles to scene
         self.add_new_tiles()
 
         # collision checks
-        self.check_coin_collision(cx, cy)
-        self.check_stair_collision(cx, cy)
+        self.check_coin_collision()
+        self.check_stair_collision()
 
         # update time text
         self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
