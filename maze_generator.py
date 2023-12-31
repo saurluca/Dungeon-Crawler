@@ -36,7 +36,7 @@ def generate_alternating_grid(tile_num_x, tile_num_y):
 
 
 class MazeGenerator:
-
+    # TODO write maze solving algorithm, to get good spots for spawning shit
     # generates a grid using prims algorithm
     # "#" represents a wall, "." a free tile
     @staticmethod
@@ -92,7 +92,6 @@ class MazeGenerator:
 
             frontier_lst.remove((y, x))
 
-        # TODO improve step of adding the border
         # Create the new grid with borders
         border_grid = ['#' * tile_num_x]  # Adds the top border
 
