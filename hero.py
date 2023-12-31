@@ -8,11 +8,5 @@ class Hero(Character):
     def __str__(self):
         return "H"
 
-    def get_x(self):
-        return self.x
-
-    def get_y(self):
-        return self.y
-
     def get_position(self):
         return self.x, self.y
