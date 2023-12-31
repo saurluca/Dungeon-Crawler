@@ -5,8 +5,9 @@ from hero import Hero
 from helper import get_line
 import time
 
-TILE_NUM_X = 15
-TILE_NUM_Y = 15
+# Only odd numbers
+TILE_NUM_X = 25
+TILE_NUM_Y = 25
 
 # TODO because of this character slightly smaller then tiles
 CHARACTER_SCALING = 1.8
@@ -19,7 +20,7 @@ SCREEN_WIDTH = 15 * TILE_SIZE
 SCREEN_HEIGHT = 16 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = True
+I_SEE_EVERYTHING = False
 DIAGONAL_MOVEMENT = True
 
 # either move smooth, half tile or full tile, change update time as well
@@ -95,7 +96,7 @@ class Game(arcade.Window):
 
         self.coin_sprites = self.scene.get_sprite_list("Coins")
 
-        cx, cy = self.maze.get_a_free_tile()
+        cx, cy = self.maze.two_points[0]
         self.hero = Hero(cx, cy)
         self.maze.set_tile(cx, cy, self.hero)
 
@@ -200,7 +201,7 @@ class Game(arcade.Window):
             # arcade.play_sound(self.win_sound)
             print(f"Total time: {round(time.time() - self.start_time, 1)}")
             print(f"Score: {self.score} / {NUM_COINS}")
-            time.sleep(1.5)
+            # time.sleep(1.5)
             self.setup()
 
     def center_camera_to_player(self):
@@ -318,6 +319,7 @@ class Game(arcade.Window):
 def main():
     window = Game()
     window.setup()
+    window.maze.print_out()
 
     arcade.schedule(window.update_things, 1 / 10)
 
