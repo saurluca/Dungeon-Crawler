@@ -51,6 +51,19 @@ class Maze(MazeGenerator):
     def check_obstacle(self, x, y):
         return not self.grid[x][y] == "#"
 
+    def check_collision_with_thing(self, x,y):
+        if not self.grid[x][y] == ".":
+            tmp = self.grid[x][y]
+            if tmp == "F":
+                pass
+            elif tmp == "c":
+                pass
+            elif tmp == "W":
+                pass
+            elif tmp == "S":
+                pass
+
+
     # TODO should not be in maze
     def generate_stair(self):
         # x, y = self.get_dead_end()
