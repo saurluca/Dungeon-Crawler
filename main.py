@@ -63,6 +63,8 @@ class Game(arcade.Window):
         self.score = 0
         self.score_text = None
 
+        self.hp_text = None
+
         # TODO rename file
         # TODO first time sound is player, game lagg
         self.collect_coin_sound = arcade.load_sound("Sounds/beltHandle2.ogg")
@@ -125,6 +127,7 @@ class Game(arcade.Window):
 
         self.score_text = arcade.Text(f"Score: {self.score} / {NUM_COINS}", 8, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 5 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
+        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8 + 20 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
 
         # TODO reduce big loading time
         # arcade.play_sound(self.start_sound, volume=0.5)
@@ -308,12 +311,17 @@ class Game(arcade.Window):
         # adds new tiles to scene
         self.add_new_tiles()
 
+        #TODO general collision check method?
         # collision checks
         self.check_coin_collision()
         self.check_stair_collision()
+       # self.check_item_collision()
+
 
         # update time text
         self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
+        # TODO create hp view method
+
 
 
 def main():
