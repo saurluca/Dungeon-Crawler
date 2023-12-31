@@ -306,7 +306,7 @@ class Game(arcade.Window):
 
         # collision checks
         self.check_coin_collision(cx, cy)
-        self.check_game_over(cx, cy)
+        self.check_stair_collision(cx, cy)
 
         # update time text
         self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
