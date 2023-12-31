@@ -114,7 +114,7 @@ class Game(arcade.Window):
             self.maze.set_tile(x, y, "c")
 
         # checks initial field of view
-        self.check_field_of_view(cx, cy)
+        self.check_field_of_view()
         # renders these tiles
         self.add_new_tiles()
 
@@ -196,7 +196,7 @@ class Game(arcade.Window):
                 self.score_text.text = f"Score: {self.score} / {NUM_COINS}"
 
     def check_stair_collision(self):
-        if self.maze(self.hero.get_position()) == "S":
+        if self.maze(*self.hero.get_position()) == "S":
             # arcade.play_sound(self.win_sound)
             print(f"Total time: {round(time.time() - self.start_time, 1)}")
             print(f"Score: {self.score} / {NUM_COINS}")
