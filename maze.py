@@ -16,7 +16,7 @@ class Maze(MazeGenerator):
         self.set_free_tiles()
 
         self.start_hero_pos = self.get_dead_end()
-        # self.stair_pos = self.generate_stair_pos()
+        self.stair_pos = self.generate_stair_pos()
         # self.generate_stair()
 
     def __call__(self, x, y):
@@ -47,8 +47,21 @@ class Maze(MazeGenerator):
     def check_obstacle(self, x, y):
         return not self.grid[x][y] == "#"
 
+
     def get_start_hero_pos(self):
         return self.start_hero_pos
+
+    def check_collision_with_thing(self, x,y):
+        if not self.grid[x][y] == ".":
+            tmp = self.grid[x][y]
+            if tmp == "F":
+                pass
+            elif tmp == "c":
+                pass
+            elif tmp == "W":
+                pass
+            elif tmp == "S":
+                pass
 
     # TODO should not be in maze
     def generate_stair(self):

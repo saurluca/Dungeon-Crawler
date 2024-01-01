@@ -193,6 +193,7 @@ class Game(arcade.Window):
             self.hero.set_y(cy + dy)
 
     # TODO possible to check via maze?
+    
     def check_coin_collision(self):
         for coin in self.coin_sprites:
             if self.hero.get_x() == int(coin.center_x / TILE_SIZE) and self.hero.get_y() == int(coin.center_y / TILE_SIZE):
@@ -210,6 +211,10 @@ class Game(arcade.Window):
             # time.sleep(1.5)
             self.setup()
 
+ '''   def check_item_collision(self):
+        for item in self.item_sprites:
+            if self.hero.get
+'''
     def center_camera_to_player(self):
         screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
         screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
