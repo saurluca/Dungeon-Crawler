@@ -16,7 +16,7 @@ class Maze(MazeGenerator):
         self.set_free_tiles()
 
         self.start_hero_pos = self.get_dead_end()
-        self.stair_pos = self.generate_stair_pos2()
+        self.stair_pos = self.generate_stair_pos3()
         self.generate_stair()
 
     def __call__(self, x, y):
@@ -129,7 +129,7 @@ class Maze(MazeGenerator):
         for i in range(len(list_distance)):
             if a <= list_distance[i]:
                 # return dead_ends[i]
-                return distances[i]
+                return dead_ends[i]
 
     def move_object_by(self, x, y, x_direction, y_direction):
         self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
