@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, randint
 from maze_generator import MazeGenerator
 
 
@@ -15,9 +15,9 @@ class Maze(MazeGenerator):
         self.free_tiles = []
         self.set_free_tiles()
 
-        self.two_points = self.get_two_distant_points()
-
-        self.generate_stair()
+        self.start_hero_pos = self.get_dead_end()
+        # self.stair_pos = self.generate_stair_pos()
+        # self.generate_stair()
 
     def __call__(self, x, y):
         return str(self.grid[x][y])
@@ -43,44 +43,123 @@ class Maze(MazeGenerator):
     def set_tile(self, x, y, thing):
         self.grid[x][y] = thing
 
-    def move_object_by(self, x, y, x_direction, y_direction):
-        self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
-        self.grid[x][y] = "."
-
     # currently only checking for walls
     def check_obstacle(self, x, y):
         return not self.grid[x][y] == "#"
+
+    def get_start_hero_pos(self):
+        return self.start_hero_pos
 
     # TODO should not be in maze
     def generate_stair(self):
         # x, y = self.get_dead_end()
         # print(x, y)
-        x, y = self.two_points[1]
+        x, y = self.stair_pos
         self.grid[x][y] = "S"
 
     def print_out(self):
         super().print_out(self.grid)
 
-    # bias hero top left
     # approximation
-    def get_two_distant_points(self):
-        longest = 0
-        two_points = ((0, 0), (0, 0))
+    def generate_stair_pos(self):
+        longest = [(0, (0, 0)) for _ in range(6)]
+        i = 0
+        x1, y1 = self.start_hero_pos
+        for x2, y2 in self.unused_dead_ends:
+            distance = abs(x2 - x1) + abs(y2 - y1)
+            minimum = (min(self.tile_num_x, self.tile_num_y) - 3) // 2
+            if distance > minimum and distance > longest[i][0]:
+                longest[i] = (distance, (x2, y2))
+                i = (i + 1) % 6
 
-        for x1, y1 in self.dead_ends:
-            for x2, y2 in self.dead_ends:
-                if x1 == x2 and y1 == y2:
-                    continue
-                distance = abs(x2 - x1) + abs(y2 - y1)
-                if distance > longest:
-                    longest = distance
-                    two_points = ((x1, y1), (x2, y2))
+        return choice(longest)[1]
 
-        self.unused_dead_ends.remove(two_points[0])
-        self.unused_dead_ends.remove(two_points[1])
-        return two_points
+    # TODO fuck you break
+    def generate_stair_pos2(self):
+        long_len = 4
+        distant_points = [(0, (0, 0)) for _ in range(long_len)]
+        x1, y1 = self.start_hero_pos
+
+        for x2, y2 in self.unused_dead_ends:
+            distance = abs(x2 - x1) + abs(y2 - y1)
+            minimum = (min(self.tile_num_x, self.tile_num_y)) // 2
+            if distance > minimum and distance > distant_points[-1][0]:
+                for i in range(long_len):
+                    if distance > distant_points[i][0]:
+                        distant_points[i] = (distance, (x2, y2))
+                        break
+
+        while True:
+            a = choice(distant_points)
+            if a[0] != 0:
+                return distant_points
+
+    def generate_stair_pos3(self):
+        """using the unused_dead_ends list this method returns an object of that list calculating the distances between the
+        dead_end and the Hero position increasing the chance of more distant dead_ends being chosen
+        """
+        dead_ends = self.unused_dead_ends
+        # print(dead_ends)
+        list_distance = []
+        distances = []
+        x1, y1 = self.start_hero_pos
+        for i in range(0, len(dead_ends)):
+            x2, y2 = dead_ends[i]
+            distances.append(abs(x2 - x1) + abs(y2))
+            list_distance.append(100 * (abs(x2 - x1) + abs(y2 - y1)))
+            # print(list_distance)
+            if i > 0:
+                list_distance[i] += list_distance[i - 1]
+
+        a = randint(0, list_distance[-1])
+        # print(list_distance)
+        # print(distances)
+        # print(f"a: {a} list_distance: {list_distance[-1]}")
+        # print(x1, y1)
+        for i in range(len(list_distance)):
+            if a <= list_distance[i]:
+                # return dead_ends[i]
+                return distances[i]
+
+    def move_object_by(self, x, y, x_direction, y_direction):
+        self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
+        self.grid[x][y] = "."
+
+
+def test1():
+    average = 0
+    n_times = 1000
+    for i in range(n_times):
+        maze = Maze(15, 15)
+        average += maze.generate_stair_pos3()
+    print(average / n_times)
+
+
+def test2():
+    for i in range(100):
+        maze = Maze(15, 15)
+        # maze.print_out()
+        # print("-----")
+        possible_pos = maze.generate_stair_pos2()
+        for pos in possible_pos:
+            if pos[0] > 0:
+                print(f"{pos[0]}, ", end="")
+        print("")
+
+
+def test3():
+    average = 0
+    looser = 0
+    n_times = 1000
+    for i in range(n_times):
+        maze = Maze(15, 15)
+        c = choice(maze.generate_stair_pos2())[0]
+        if c == 0:
+            looser += 1
+        average += c
+    print(average / n_times)
+    print(looser)
 
 
 if __name__ == '__main__':
-    maze = Maze(11, 11)
-    maze.print_out()
+    test3()

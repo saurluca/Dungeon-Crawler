@@ -6,8 +6,8 @@ from helper import get_line
 import time
 
 # Only odd numbers
-TILE_NUM_X = 25
-TILE_NUM_Y = 25
+TILE_NUM_X = 15
+TILE_NUM_Y = 15
 
 # TODO because of this character slightly smaller then tiles
 CHARACTER_SCALING = 1.8
@@ -15,12 +15,13 @@ TILE_SCALING = 2.0
 COIN_SCALING = 1.4
 TILE_SIZE = 32
 
+# height should be width +1, to accommodate the ui
 SCREEN_TITLE = "Dungeon Crawler"
 SCREEN_WIDTH = 15 * TILE_SIZE
 SCREEN_HEIGHT = 16 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = False
+I_SEE_EVERYTHING = True
 DIAGONAL_MOVEMENT = True
 
 # either move smooth, half tile or full tile, change update time as well
@@ -98,7 +99,7 @@ class Game(arcade.Window):
 
         self.coin_sprites = self.scene.get_sprite_list("Coins")
 
-        cx, cy = self.maze.two_points[0]
+        cx, cy = self.maze.get_start_hero_pos()
         self.hero = Hero(cx, cy)
         self.maze.set_tile(cx, cy, self.hero)
 
@@ -128,7 +129,7 @@ class Game(arcade.Window):
         self.score_text = arcade.Text(f"Score: {self.score} / {NUM_COINS}", 8, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 5 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8 + 10 * TILE_SIZE, SCREEN_HEIGHT - 24,
-                                   arcade.csscolor.BLACK, 18)
+                                   arcade.csscolor.GREEN, 18, bold=True)
 
         # TODO reduce big loading time
         # arcade.play_sound(self.start_sound, volume=0.5)
@@ -328,7 +329,7 @@ class Game(arcade.Window):
 def main():
     window = Game()
     window.setup()
-    # window.maze.print_out()
+    window.maze.print_out()
 
     arcade.schedule(window.update_things, 1 / 8)
 
