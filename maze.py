@@ -1,3 +1,4 @@
+import time
 from random import choice, randint
 from maze_generator import MazeGenerator
 
@@ -16,6 +17,7 @@ class Maze(MazeGenerator):
         self.set_free_tiles()
 
         self.start_hero_pos = self.get_dead_end()
+
         self.stair_pos = self.generate_stair_pos3()
         self.generate_stair()
 
@@ -99,6 +101,7 @@ class Maze(MazeGenerator):
                         distant_points[i] = (distance, (x2, y2))
                         break
 
+        # ensures distance not 0, because of default assignment
         while True:
             a = choice(distant_points)
             if a[0] != 0:
@@ -158,14 +161,22 @@ def test2():
 
 
 def test3():
-    average = 0
-    looser = 0
+    total_time1 = 0
+    total_time2 = 0
     n_times = 1000
     for i in range(n_times):
         maze = Maze(15, 15)
-        average += maze.generate_stair_pos2()[0]
-    print(average / n_times)
-    print(looser)
+        start_time = time.time()
+        maze.generate_stair_pos2()
+        total_time1 += time.time() - start_time
+    for i in range(n_times):
+        maze = Maze(15, 15)
+        start_time = time.time()
+        maze.generate_stair_pos3()
+        total_time2 += time.time() - start_time
+
+    print(100*total_time1)
+    print(100*total_time2)
 
 
 if __name__ == '__main__':

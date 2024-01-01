@@ -21,7 +21,7 @@ SCREEN_WIDTH = 15 * TILE_SIZE
 SCREEN_HEIGHT = 16 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = True
+I_SEE_EVERYTHING = False
 DIAGONAL_MOVEMENT = True
 
 # either move smooth, half tile or full tile, change update time as well
