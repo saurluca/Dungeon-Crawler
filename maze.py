@@ -16,8 +16,8 @@ class Maze(MazeGenerator):
         self.set_free_tiles()
 
         self.start_hero_pos = self.get_dead_end()
-        self.stair_pos = self.generate_stair_pos()
-        # self.generate_stair()
+        self.stair_pos = self.generate_stair_pos2()
+        self.generate_stair()
 
     def __call__(self, x, y):
         return str(self.grid[x][y])
@@ -47,11 +47,10 @@ class Maze(MazeGenerator):
     def check_obstacle(self, x, y):
         return not self.grid[x][y] == "#"
 
-
     def get_start_hero_pos(self):
         return self.start_hero_pos
 
-    def check_collision_with_thing(self, x,y):
+    def check_collision_with_thing(self, x, y):
         if not self.grid[x][y] == ".":
             tmp = self.grid[x][y]
             if tmp == "F":
@@ -65,8 +64,6 @@ class Maze(MazeGenerator):
 
     # TODO should not be in maze
     def generate_stair(self):
-        # x, y = self.get_dead_end()
-        # print(x, y)
         x, y = self.stair_pos
         self.grid[x][y] = "S"
 
@@ -74,7 +71,7 @@ class Maze(MazeGenerator):
         super().print_out(self.grid)
 
     # approximation
-    def generate_stair_pos(self):
+    def generate_stair_pos1(self):
         longest = [(0, (0, 0)) for _ in range(6)]
         i = 0
         x1, y1 = self.start_hero_pos
@@ -89,7 +86,7 @@ class Maze(MazeGenerator):
 
     # TODO fuck you break
     def generate_stair_pos2(self):
-        long_len = 4
+        long_len = 3
         distant_points = [(0, (0, 0)) for _ in range(long_len)]
         x1, y1 = self.start_hero_pos
 
@@ -105,7 +102,7 @@ class Maze(MazeGenerator):
         while True:
             a = choice(distant_points)
             if a[0] != 0:
-                return distant_points
+                return a[1]
 
     def generate_stair_pos3(self):
         """using the unused_dead_ends list this method returns an object of that list calculating the distances between the
@@ -166,10 +163,7 @@ def test3():
     n_times = 1000
     for i in range(n_times):
         maze = Maze(15, 15)
-        c = choice(maze.generate_stair_pos2())[0]
-        if c == 0:
-            looser += 1
-        average += c
+        average += maze.generate_stair_pos2()[0]
     print(average / n_times)
     print(looser)
 

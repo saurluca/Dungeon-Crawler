@@ -211,10 +211,10 @@ class Game(arcade.Window):
             # time.sleep(1.5)
             self.setup()
 
- '''   def check_item_collision(self):
+    '''   def check_item_collision(self):
         for item in self.item_sprites:
             if self.hero.get
-'''
+    '''
     def center_camera_to_player(self):
         screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
         screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
