@@ -1,6 +1,6 @@
 """
 the purpose of this class it to check the field of view of the hero
-TODO question, keep as an object or only as a method to be inherited?
+then returns the tiles that are uncovered for the first time
 """
 
 VIEW_RANGE = 3

@@ -4,38 +4,30 @@ from random import choice
 from hero import Hero
 from level import Level
 
-
-# TODO because of this character slightly smaller then tiles
 CHARACTER_SCALING = 1.8
 TILE_SCALING = 2.0
 COIN_SCALING = 1.4
 TILE_SIZE = 32
 
 # height should be width +1, to accommodate the ui
-SCREEN_TITLE = "Dungeon Crawler"
-SCREEN_WIDTH = 15 * TILE_SIZE
-SCREEN_HEIGHT = 16 * TILE_SIZE
+SCREEN_WIDTH = 19 * TILE_SIZE
+SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # cheat mode for full vision
 I_SEE_EVERYTHING = True
+# enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
-
-# either move smooth, half tile or full tile, change update time as well
-PLAYER_MOVEMENT_SPEED = TILE_SIZE
-VIEW_RANGE = 3
 
 
 class Game(arcade.Window):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler")
         self.hero = Hero()
         self.level = None
 
-        self.level_count = 1
-
         # only odd numbers
-        self.tile_num_x = 15
-        self.tile_num_y = 15
+        self.tile_num_x = 19
+        self.tile_num_y = 19
 
         self.num_coins = 20
 
@@ -55,25 +47,28 @@ class Game(arcade.Window):
         # camera used for gui elements
         self.ui_camera = None
 
-        # keeps track of time spent in a level
-        self.start_time = time.time()
-        self.time_text = None
+        # text display object
+        self.hp_text = None
 
         # keeps track of and displays the score, currently coins collected
         self.score = 0
         self.score_text = None
 
-        self.hp_text = None
+        # keeps track of number of levels played
+        self.levels_played = 1
+        self.level_played_text = None
 
-        # TODO rename file
-        # TODO first time sound is player, game lagg
-        self.collect_coin_sound = arcade.load_sound("Sounds/beltHandle2.ogg")
-        self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
-        self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
+        # keeps track of time spent in a level
+        self.start_time = time.time()
+        self.time_text = None
+
+        # TODO first time sound is played, the game lags
+        # self.collect_coin_sound = arcade.load_sound("Sounds/coin_sound.ogg")
+        # self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
+        # self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
-    # TODO loading screen
     def setup(self):
         self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins)
 
@@ -99,11 +94,12 @@ class Game(arcade.Window):
         self.player_sprite.center_y = self.hero.get_y() * TILE_SIZE + TILE_SIZE // 2
         self.scene.add_sprite("Player", self.player_sprite)
 
-        # ui text
-        self.score_text = arcade.Text(f"Score: {self.score} / {self.num_coins}", 8, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
-        self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 5 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
-        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8 + 10 * TILE_SIZE, SCREEN_HEIGHT - 24,
+        # display ui texts
+        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
                                    arcade.csscolor.GREEN, 18, bold=True)
+        self.score_text = arcade.Text(f"Score: {self.score} / {self.num_coins}", 8 + 4 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
+        self.level_played_text = arcade.Text(f"Level: {self.levels_played}", 8 + 10 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
+        self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 14 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
 
         # Cheat mode to see everything
         if I_SEE_EVERYTHING:
@@ -116,10 +112,10 @@ class Game(arcade.Window):
         # TODO reduce big loading time
         # arcade.play_sound(self.start_sound, volume=0.5)
 
+    # if a key is pressed, changes movement speed in the pressed direction
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_change_x = 1
-
             if not DIAGONAL_MOVEMENT:
                 self.player_change_y = 0
         elif key == arcade.key.LEFT or key == arcade.key.A:
@@ -135,6 +131,7 @@ class Game(arcade.Window):
             if not DIAGONAL_MOVEMENT:
                 self.player_change_x = 0
 
+    # if key is released, resets movement speed in that direction
     def on_key_release(self, key, modifiers):
         if key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_change_x = 0
@@ -145,6 +142,7 @@ class Game(arcade.Window):
         elif key == arcade.key.DOWN or key == arcade.key.S:
             self.player_change_y = 0
 
+    # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
         screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
         screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
@@ -164,7 +162,7 @@ class Game(arcade.Window):
         self.camera.move_to(player_centered)
 
     # creates a new sprite
-    def set_texture(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):
+    def create_sprite(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):
         sprite = arcade.Sprite(texture, t_scaling)
         sprite.center_x = x * TILE_SIZE + TILE_SIZE // 2
         sprite.center_y = y * TILE_SIZE + TILE_SIZE // 2
@@ -179,17 +177,17 @@ class Game(arcade.Window):
                 # random walls and floor tiles to make it look nicer
                 if self.level.maze(x, y) == "#":
                     wall_texture = choice(("Tiles/tile_0014.png", "Tiles/tile_0040.png"))
-                    self.set_texture(wall_texture, "Walls", x, y)
+                    self.create_sprite(wall_texture, "Walls", x, y)
                 else:
                     floor_texture = choice(("Tiles/tile_0042.png", "Tiles/tile_0048.png", "Tiles/tile_0049.png"))
-                    self.set_texture(floor_texture, "Floor", x, y)
+                    self.create_sprite(floor_texture, "Floor", x, y)
                 if self.level.maze(x, y) == "c":
                     coin = "Tiles/tile_0003.png"
-                    self.set_texture(coin, "Coins", x, y, COIN_SCALING)
+                    self.create_sprite(coin, "Coins", x, y, COIN_SCALING)
                 # TODO better stair texture
                 elif self.level.maze(x, y) == "S":
                     stair_texture = "Tiles/tile_0039.png"
-                    self.set_texture(stair_texture, "Stairs", x, y)
+                    self.create_sprite(stair_texture, "Stairs", x, y)
 
     def update_hp_display(self):
         self.hp_text.text = f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}"
@@ -198,6 +196,10 @@ class Game(arcade.Window):
         if self.level.check_coin_collected():
             self.score += 1
         self.score_text.text = f"Score: {self.score} / {self.num_coins}"
+
+    def update_levels_played(self):
+        self.levels_played += 1
+        self.level_played_text.text = f"Level: {self.levels_played}"
 
     def update_display_time(self):
         self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
@@ -218,16 +220,18 @@ class Game(arcade.Window):
     def draw_ui(self):
         # used as a background to draw on
         arcade.draw_rectangle_filled(0, SCREEN_HEIGHT - TILE_SIZE / 2, SCREEN_WIDTH * 2, TILE_SIZE, arcade.csscolor.SADDLE_BROWN)
-        self.score_text.draw()
-        self.time_text.draw()
         self.hp_text.draw()
+        self.score_text.draw()
+        self.level_played_text.draw()
+        self.time_text.draw()
 
     # if player walks on stair, generates new level
     # with more coins, and bigger maze
     def check_level_completed(self):
         if self.level.check_completed():
-            self.level_count += 1
-            self.num_coins += self.level_count*2 + 2
+            self.update_levels_played()
+            self.num_coins += self.levels_played * 2 + 2
+
             # only even numbers, so the end result will be odd
             self.tile_num_x += 4
             self.tile_num_y += 4
@@ -257,18 +261,17 @@ class Game(arcade.Window):
         if not I_SEE_EVERYTHING:
             self.add_new_tiles(self.level.get_newly_visible_tiles())
 
+        self.center_camera_to_player()
+
+        # update dynamic sprites
         self.update_player_sprite()
         self.update_coin_sprites()
         # TODO insert enemy sprites
-
-        self.center_camera_to_player()
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()
         self.update_score()
         self.update_display_time()
-
-        # TODO create hp view method
 
 
 def main():

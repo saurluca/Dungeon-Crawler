@@ -2,7 +2,6 @@ from maze import Maze
 from field_of_view import FieldOfView
 
 
-# TODO put generation into level class
 class Level:
     def __init__(self, hero, tile_num_x, tile_num_y, num_coins):
         self.tile_num_x = tile_num_x
@@ -24,7 +23,7 @@ class Level:
 
         self.completed = False
 
-    # TODO keep it here or do item managing class?
+    # TODO keep it here or do item managing/generation class?
     def generate_coins(self):
         for i in range(self.num_coins):
             x, y = self.maze.get_free_tile()
@@ -47,7 +46,6 @@ class Level:
             self.check_special_collision(cx, cy + dy)
             self.hero.set_y(cy + dy)
 
-    # TODO temporally moved to main
     # add item and other special thing collision here
     def check_special_collision(self, x, y):
         tile = self.maze(x, y)
