@@ -30,6 +30,7 @@ class Game(arcade.Window):
         self.tile_num_y = 19
 
         self.num_coins = 20
+        self.total_num_coins = self.num_coins
 
         # used for interaction between level and main class
         self.player_change_x = 0
@@ -45,7 +46,7 @@ class Game(arcade.Window):
         # player camera
         self.camera = None
         # camera used for gui elements
-        self.ui_camera = None
+        self.ui_camera = arcade.Camera(self.width, self.height)
 
         # text display object
         self.hp_text = None
@@ -76,8 +77,9 @@ class Game(arcade.Window):
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         # set up ui/ camera, extra so it does not move around like the rest of the game
-        self.ui_camera = arcade.Camera(self.width, self.height)
+        # self.ui_camera = arcade.Camera(self.width, self.height)
 
+        # sets up the scene, container for sprites
         self.scene = arcade.Scene()
         self.scene.add_sprite_list("Floor", use_spatial_hash=True)
         self.scene.add_sprite_list("Walls", use_spatial_hash=True)
@@ -97,7 +99,7 @@ class Game(arcade.Window):
         # display ui texts
         self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
                                    arcade.csscolor.GREEN, 18, bold=True)
-        self.score_text = arcade.Text(f"Score: {self.score} / {self.num_coins}", 8 + 4 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
+        self.score_text = arcade.Text(f"Score: {self.score} / {self.total_num_coins}", 8 + 4 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.level_played_text = arcade.Text(f"Level: {self.levels_played}", 8 + 10 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 14 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
 
@@ -195,7 +197,7 @@ class Game(arcade.Window):
     def update_score(self):
         if self.level.check_coin_collected():
             self.score += 1
-        self.score_text.text = f"Score: {self.score} / {self.num_coins}"
+        self.score_text.text = f"Score: {self.score} / {self.total_num_coins}"
 
     def update_levels_played(self):
         self.levels_played += 1
@@ -231,7 +233,7 @@ class Game(arcade.Window):
         if self.level.check_completed():
             self.update_levels_played()
             self.num_coins += self.levels_played * 2 + 2
-
+            self.total_num_coins += self.num_coins
             # only even numbers, so the end result will be odd
             self.tile_num_x += 4
             self.tile_num_y += 4
