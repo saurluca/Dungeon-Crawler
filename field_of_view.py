@@ -3,11 +3,13 @@ the purpose of this class it to check the field of view of the hero
 TODO question, keep as an object or only as a method to be inherited?
 """
 
+VIEW_RANGE = 3
+
 
 class FieldOfView:
-    def __init__(self, maze, view_range=3):
+    def __init__(self, maze):
         self.maze = maze
-        self.view_range = view_range
+        self.view_range = VIEW_RANGE
         self.tile_num_x, self.tile_num_y = maze.get_tile_num()
 
         self.view_range_mask = self.create_view_range_mask()

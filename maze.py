@@ -4,7 +4,7 @@ from maze_generator import MazeGenerator
 
 
 class Maze(MazeGenerator):
-    def __init__(self, tile_num_x=9, tile_num_y=9, recursive_weight=4, random_weight=1):
+    def __init__(self, tile_num_x=15, tile_num_y=15, recursive_weight=4, random_weight=1):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
 
@@ -18,9 +18,6 @@ class Maze(MazeGenerator):
 
         self.start_hero_pos = self.get_dead_end()
 
-        self.stair_pos = self.generate_stair_pos3()
-        self.generate_stair()
-
     def __call__(self, x, y):
         return str(self.grid[x][y])
 
@@ -30,7 +27,19 @@ class Maze(MazeGenerator):
                 if self.grid[x][y] == "." and (x, y) not in self.dead_ends:
                     self.free_tiles.append((x, y))
 
-    # TODO for generation of things, not complete random, eg not in hero view range
+    def set_tile(self, x, y, thing):
+        self.grid[x][y] = thing
+
+    # currently only checking for walls
+    def check_obstacle(self, x, y):
+        return not self.grid[x][y] == "#"
+
+    def print_out(self):
+        super().print_out(self.grid)
+
+    def get_tile_num(self):
+        return self.tile_num_x, self.tile_num_y
+
     def get_free_tile(self):
         free_tile = choice(self.free_tiles)
         self.free_tiles.remove(free_tile)
@@ -41,53 +50,10 @@ class Maze(MazeGenerator):
         self.unused_dead_ends.remove(dead_end)
         return dead_end
 
-    def set_tile(self, x, y, thing):
-        self.grid[x][y] = thing
-
-    # currently only checking for walls
-    def check_obstacle(self, x, y):
-        return not self.grid[x][y] == "#"
-
     def get_start_hero_pos(self):
         return self.start_hero_pos
 
-    def check_collision_with_thing(self, x, y):
-        if not self.grid[x][y] == ".":
-            tmp = self.grid[x][y]
-            if tmp == "F":
-                pass
-            elif tmp == "c":
-                pass
-            elif tmp == "W":
-                pass
-            elif tmp == "S":
-                pass
-
-    # TODO should not be in maze
-    def generate_stair(self):
-        x, y = self.stair_pos
-        self.grid[x][y] = "S"
-
-    def print_out(self):
-        super().print_out(self.grid)
-
-    def get_tile_num(self):
-        return self.tile_num_x, self.tile_num_y
-
-    # approximation
-    def generate_stair_pos1(self):
-        longest = [(0, (0, 0)) for _ in range(6)]
-        i = 0
-        x1, y1 = self.start_hero_pos
-        for x2, y2 in self.unused_dead_ends:
-            distance = abs(x2 - x1) + abs(y2 - y1)
-            minimum = (min(self.tile_num_x, self.tile_num_y) - 3) // 2
-            if distance > minimum and distance > longest[i][0]:
-                longest[i] = (distance, (x2, y2))
-                i = (i + 1) % 6
-
-        return choice(longest)[1]
-
+    # only an approximation of distance, not actual walk distance
     # TODO fuck you break
     def generate_stair_pos2(self):
         long_len = 3
@@ -165,8 +131,8 @@ def test2():
         maze.generate_stair_pos3()
         total_time2 += time.time() - start_time
 
-    print(100*total_time1)
-    print(100*total_time2)
+    print(100 * total_time1)
+    print(100 * total_time2)
 
 
 if __name__ == '__main__':
