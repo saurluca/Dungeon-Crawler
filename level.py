@@ -33,9 +33,10 @@ class Level:
         x, y = self.maze.generate_stair_pos2()
         self.maze.set_tile(x, y, "S")
 
+    # TODO insert enemy generation method here
+
     def move_player(self, dx, dy):
         cx, cy = self.hero.get_position()
-
         if self.maze.check_obstacle(cx + dx, cy + dy):
             self.check_special_collision(cx + dx, cy + dy)
             self.hero.set_position(cx + dx, cy + dy)
@@ -64,5 +65,21 @@ class Level:
     def check_coin_collected(self):
         return self.new_coin_collected
 
+    # calculates the fov and then returns a list of tiles that have not been seen before
     def get_newly_visible_tiles(self):
         return self.fov.calculate_fov(*self.hero.get_position())
+
+    # TODO insert enemy symbol here
+    # adds to the list of new tiles, the type, so the checking and access to maze is handled in level
+    def add_tile_type(self, new_tiles):
+        for i in range(len(new_tiles)):
+            object_type = self.maze(*new_tiles[i])
+            if object_type == "#":
+                new_tiles[i] = (new_tiles[i], "#")
+            elif object_type == "c":
+                new_tiles[i] = (new_tiles[i], "c")
+            elif object_type == "S":
+                new_tiles[i] = (new_tiles[i], "S")
+            else:
+                new_tiles[i] = (new_tiles[i], "")
+        return new_tiles

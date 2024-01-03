@@ -100,7 +100,8 @@ class Game(arcade.Window):
         # display ui texts
         self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
                                    arcade.csscolor.GREEN, 18, bold=True)
-        self.score_text = arcade.Text(f"Score: {self.score} / {self.total_num_coins}", 8 + 4 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
+        self.score_text = arcade.Text(f"Score: {self.score} / {self.total_num_coins}", 8 + 4 * TILE_SIZE + 16, SCREEN_HEIGHT - 24,
+                                      arcade.csscolor.BLACK, 18)
         self.level_played_text = arcade.Text(f"Level: {self.levels_played}", 8 + 10 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 14 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
 
@@ -110,7 +111,7 @@ class Game(arcade.Window):
             for x in range(self.tile_num_x):
                 for y in range(self.tile_num_y):
                     every_tile.append((x, y))
-            self.add_new_tiles(every_tile)
+            self.add_new_tiles_to_scene(every_tile)
 
         # TODO reduce big loading time
         # arcade.play_sound(self.start_sound, volume=0.5)
@@ -133,7 +134,7 @@ class Game(arcade.Window):
             self.player_change_y = -1
             if not DIAGONAL_MOVEMENT:
                 self.player_change_x = 0
-        # finish game
+        # finish game when pressing escape, save current stats
         elif key == arcade.key.ESCAPE:
             write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
             self.close()
@@ -175,26 +176,25 @@ class Game(arcade.Window):
         sprite.center_y = y * TILE_SIZE + TILE_SIZE // 2
         self.scene.add_sprite(scene_name, sprite)
 
-    # TODO should not access maze here?
-    # add the tiles not seen before to the scene
-    def add_new_tiles(self, new_tiles):
-        if new_tiles is not None:
-            for tile in new_tiles:
-                x, y = tile
-                # random walls and floor tiles to make it look nicer
-                if self.level.maze(x, y) == "#":
-                    wall_texture = choice(("Tiles/tile_0014.png", "Tiles/tile_0040.png"))
-                    self.create_sprite(wall_texture, "Walls", x, y)
-                else:
-                    floor_texture = choice(("Tiles/tile_0042.png", "Tiles/tile_0048.png", "Tiles/tile_0049.png"))
-                    self.create_sprite(floor_texture, "Floor", x, y)
-                if self.level.maze(x, y) == "c":
-                    coin = "Tiles/tile_0003.png"
-                    self.create_sprite(coin, "Coins", x, y, COIN_SCALING)
-                # TODO better stair texture, make more obvious
-                elif self.level.maze(x, y) == "S":
-                    stair_texture = "Tiles/tile_0039.png"
-                    self.create_sprite(stair_texture, "Stairs", x, y)
+    # adds the tiles not seen before to the scene
+    def add_new_tiles_to_scene(self, new_tiles):
+        for tile in new_tiles:
+            pos, object_type = tile[0], tile[1]
+            # random walls and floor tiles to make it look nicer
+            if object_type == "#":
+                wall_texture = choice(("Tiles/tile_0014.png", "Tiles/tile_0040.png"))
+                self.create_sprite(wall_texture, "Walls", *pos)
+            else:
+                floor_texture = choice(("Tiles/tile_0042.png", "Tiles/tile_0048.png", "Tiles/tile_0049.png"))
+                self.create_sprite(floor_texture, "Floor", *pos)
+            if object_type == "c":
+                coin = "Tiles/tile_0003.png"
+                self.create_sprite(coin, "Coins", *pos, COIN_SCALING)
+            # TODO better stair texture, make more obvious
+            elif object_type == "S":
+                stair_texture = "Tiles/tile_0039.png"
+                self.create_sprite(stair_texture, "Stairs", *pos)
+            # TODO insert here enemy sprite rendering
 
     def update_hp_display(self):
         self.hp_text.text = f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}"
@@ -258,6 +258,7 @@ class Game(arcade.Window):
 
         self.draw_ui()
 
+    # noinspection PyUnusedLocal
     def update_things(self, delta_time):
         self.check_level_completed()
 
@@ -266,14 +267,15 @@ class Game(arcade.Window):
 
         # adds new tiles to scene
         if not I_SEE_EVERYTHING:
-            self.add_new_tiles(self.level.get_newly_visible_tiles())
+            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+            self.add_new_tiles_to_scene(new_tiles)
 
         self.center_camera_to_player()
 
         # update dynamic sprites
         self.update_player_sprite()
         self.update_coin_sprites()
-        # TODO insert enemy sprites
+        # TODO insert update enemy sprites
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()
