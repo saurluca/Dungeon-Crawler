@@ -3,6 +3,7 @@ import time
 from random import choice
 from hero import Hero
 from level import Level
+from read_write import write_down_stats
 
 CHARACTER_SCALING = 1.8
 TILE_SCALING = 2.0
@@ -14,7 +15,7 @@ SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = True
+I_SEE_EVERYTHING = False
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 
@@ -26,8 +27,8 @@ class Game(arcade.Window):
         self.level = None
 
         # only odd numbers
-        self.tile_num_x = 19
-        self.tile_num_y = 19
+        self.tile_num_x = 11
+        self.tile_num_y = 11
 
         self.num_coins = 20
         self.total_num_coins = self.num_coins
@@ -132,6 +133,10 @@ class Game(arcade.Window):
             self.player_change_y = -1
             if not DIAGONAL_MOVEMENT:
                 self.player_change_x = 0
+        # finish game
+        elif key == arcade.key.ESCAPE:
+            write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
+            self.close()
 
     # if key is released, resets movement speed in that direction
     def on_key_release(self, key, modifiers):
@@ -186,7 +191,7 @@ class Game(arcade.Window):
                 if self.level.maze(x, y) == "c":
                     coin = "Tiles/tile_0003.png"
                     self.create_sprite(coin, "Coins", x, y, COIN_SCALING)
-                # TODO better stair texture
+                # TODO better stair texture, make more obvious
                 elif self.level.maze(x, y) == "S":
                     stair_texture = "Tiles/tile_0039.png"
                     self.create_sprite(stair_texture, "Stairs", x, y)
