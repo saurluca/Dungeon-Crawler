@@ -31,8 +31,7 @@ class Maze(MazeGenerator):
                     self.free_tiles.append((x, y))
 
     # TODO for generation of things, not complete random, eg not in hero view range
-    # TODO refactor to get_free_tile
-    def get_a_free_tile(self):
+    def get_free_tile(self):
         free_tile = choice(self.free_tiles)
         self.free_tiles.remove(free_tile)
         return free_tile
@@ -71,6 +70,9 @@ class Maze(MazeGenerator):
 
     def print_out(self):
         super().print_out(self.grid)
+
+    def get_tile_num(self):
+        return self.tile_num_x, self.tile_num_y
 
     # approximation
     def generate_stair_pos1(self):
@@ -149,18 +151,6 @@ def test1():
 
 
 def test2():
-    for i in range(100):
-        maze = Maze(15, 15)
-        # maze.print_out()
-        # print("-----")
-        possible_pos = maze.generate_stair_pos2()
-        for pos in possible_pos:
-            if pos[0] > 0:
-                print(f"{pos[0]}, ", end="")
-        print("")
-
-
-def test3():
     total_time1 = 0
     total_time2 = 0
     n_times = 1000
@@ -180,4 +170,4 @@ def test3():
 
 
 if __name__ == '__main__':
-    test3()
+    test2()
