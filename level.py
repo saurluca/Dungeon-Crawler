@@ -8,7 +8,7 @@ from enemy import Enemy
 
 
 class Level:
-    BASE_HP_LOSS = 1
+    BASE_HP_LOSS = 5
 
     def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_enemies, enemies_lst):
 

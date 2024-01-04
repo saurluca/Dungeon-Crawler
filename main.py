@@ -15,18 +15,18 @@ TILE_SIZE = 32
 SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
+
+
 # TODO Fix Omnivision
 # cheat mode for full vision
 I_SEE_EVERYTHING = False
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 
-
-
-
 class Game(arcade.Window):
     def __init__(self):
-        self.TICK = 0
+        self.tick = 0
+        self.player_is_dead = False
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler")
         self.hero = Hero()
         self.level = None
@@ -135,10 +135,9 @@ class Game(arcade.Window):
     # if a key is pressed, changes movement speed in the pressed direction
     def stop_game(self, stop):
         if stop:
-            write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
-            print("yay")
+           # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
             arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, [00,00,00,0.7])
-            time.sleep(3)
+          #  time.sleep(3)
             self.close()
 
     def on_key_press(self, key, modifiers):
@@ -160,7 +159,7 @@ class Game(arcade.Window):
                 self.player_change_x = 0
         # finish game when pressing escape, save current stats
         elif key == arcade.key.ESCAPE:
-            self.stop_game()
+            self.stop_game(True)
 
     # if key is released, resets movement speed in that direction
     def on_key_release(self, key, modifiers):
@@ -225,8 +224,9 @@ class Game(arcade.Window):
                 self.create_sprite(stair_texture, "Stairs", *pos)
 
     def update_hp_display(self):
-        self.hp_text.text = f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}"
-        print(f"yay+ {self.TICK}")
+        if self.hero.hp > 0:
+            self.hp_text.text = f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}"
+
 
     def update_score(self):
         if self.level.check_coin_collected():
@@ -301,33 +301,36 @@ class Game(arcade.Window):
         self.draw_ui()
 
     # noinspection PyUnusedLocal
+
     def update_things(self, delta_time):
+        if not self.player_is_dead:
+            self.check_level_completed()
 
-        self.check_level_completed()
+            if self.tick_count % 2 == 0:
+                self.level.move_enemies()
+                self.update_enemy_sprites()
 
-        if self.tick_count % 2 == 0:
-            self.level.move_enemies()
-            self.update_enemy_sprites()
+            # updates player position
+            self.level.move_player(self.player_change_x, self.player_change_y)
 
-        # updates player position
-        self.level.move_player(self.player_change_x, self.player_change_y)
+            # adds new tiles to scene
+            if not I_SEE_EVERYTHING:
+                new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+                self.add_new_tiles_to_scene(new_tiles)
 
-        # adds new tiles to scene
-        if not I_SEE_EVERYTHING:
-            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
-            self.add_new_tiles_to_scene(new_tiles)
+            self.center_camera_to_player()
 
-        self.center_camera_to_player()
+            # update dynamic sprites
+            self.update_player_sprite()
+            self.update_coin_sprites()
+            self.update_item_sprites()
 
-        # update dynamic sprites
-        self.update_player_sprite()
-        self.update_coin_sprites()
-        self.update_item_sprites()
+            if self.tick % 10 == 0:
+                self.player_is_dead = self.level.base_hp_loss()
+                self.stop_game(self.player_is_dead)
 
-        if self.TICK % 10 == 0:
-            self.stop_game(self.level.base_hp_loss())
-
-        self.TICK += 1
+            print(self.player_is_dead)
+            self.tick += 1
 
 
         # TODO insert update enemy sprites

@@ -45,3 +45,18 @@ reached level: 2
 in: 24.1s
 score of: 20/46
 ---
+
+reached level: 2
+in: 24.1s
+score of: 8/46
+---
+name
+reached level: 1
+in: 24.6s
+score of: 11/20
+---
+
+reached level: 1
+in: 24.2s
+score of: 9/20
+---
