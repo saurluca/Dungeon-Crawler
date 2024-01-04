@@ -17,7 +17,7 @@ SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # TODO Fix Omnivision
 # cheat mode for full vision
-I_SEE_EVERYTHING = False
+I_SEE_EVERYTHING = True
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 
@@ -29,8 +29,8 @@ class Game(arcade.Window):
         self.level = None
 
         # only odd numbers
-        self.tile_num_x = 11
-        self.tile_num_y = 11
+        self.tile_num_x = 13
+        self.tile_num_y = 13
 
         self.num_coins = 20
         self.total_num_coins = self.num_coins
@@ -45,6 +45,7 @@ class Game(arcade.Window):
         # player and coin sprite seperated, so they can be changed dynamically
         self.player_sprite = None
         self.coin_sprites = None
+        self.item_sprites = None
 
         # player camera
         self.camera = None
@@ -94,7 +95,6 @@ class Game(arcade.Window):
         self.coin_sprites = self.scene.get_sprite_list("Coins")
         self.item_sprites = self.scene.get_sprite_list("Items")
 
-
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
         self.player_sprite = arcade.Sprite(player_texture, TILE_SCALING)
@@ -116,7 +116,7 @@ class Game(arcade.Window):
             for x in range(self.tile_num_x):
                 for y in range(self.tile_num_y):
                     every_tile.append((x, y))
-            self.add_new_tiles_to_scene(every_tile)
+            self.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
 
         # TODO reduce big loading time
         # arcade.play_sound(self.start_sound, volume=0.5)
@@ -230,11 +230,13 @@ class Game(arcade.Window):
             for coin in self.coin_sprites:
                 if self.hero.get_position() == (int(coin.center_x / TILE_SIZE), int(coin.center_y / TILE_SIZE)):
                     self.coin_sprites.remove(coin)
+
     def update_item_sprites(self):
         if self.level.check_item_collected():
             for item in self.item_sprites:
                 if self.hero.get_position() == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
                     self.item_sprites.remove(item)
+
     # background square and text for score, time and hp displayed on the top
     def draw_ui(self):
         # used as a background to draw on
@@ -252,8 +254,8 @@ class Game(arcade.Window):
             self.num_coins += self.levels_played * 2 + 2
             self.total_num_coins += self.num_coins
             # only even numbers, so the end result will be odd
-            self.tile_num_x += 4
-            self.tile_num_y += 4
+            self.tile_num_x += 2
+            self.tile_num_y += 2
             self.setup()
 
     def on_draw(self):

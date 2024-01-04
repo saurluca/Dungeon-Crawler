@@ -45,7 +45,6 @@ class Level:
         self.maze.set_tile(x, y, "I")
         self.item_list.append(Weapon(x, y, 10))
 
-
     # TODO insert enemy generation method here
     def move_player(self, dx, dy):
         cx, cy = self.hero.get_position()
