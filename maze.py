@@ -36,7 +36,7 @@ class Maze(MazeGenerator):
 
     # currently only checking for walls
     def check_obstacle(self, x, y):
-        return not (self.grid[x][y] == "#" or self.grid[x][y] == "E")
+        return not (self.grid[x][y] == "#" or str(self.grid[x][y]) == "E")
 
     def print_out(self):
         super().print_out(self.grid)

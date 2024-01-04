@@ -6,7 +6,6 @@ from weapon import Weapon
 from enemy import Enemy
 from food import Food
 
-BASE_HP_LOSS = 5
 BASE_HP_LOSS = 0.01
 
 
@@ -144,7 +143,6 @@ class Level:
             return True
         return False
 
-    # TODO this function has two purposes, maybe separate
     def base_hp_loss(self, factor=1):
         self.hero.hp -= BASE_HP_LOSS * factor
 
