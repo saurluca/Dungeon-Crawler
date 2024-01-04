@@ -183,24 +183,23 @@ class Game(arcade.Window):
     # TODO, if maze smaller then window, ugly
     # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
-        screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
-        screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
+        if self.tile_num_x >= SCREEN_WIDTH and self.tile_num_y >= SCREEN_HEIGHT - 1:
+            screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
+            screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
 
-        # Don't let camera travel past 0 or past border
-        if self.tile_num_x >= SCREEN_WIDTH:
+            # Don't let camera travel past 0 or past border
             if screen_center_x < 0:
                 screen_center_x = 0
             elif screen_center_x > self.tile_num_x * TILE_SIZE - SCREEN_WIDTH:
                 screen_center_x = self.tile_num_x * TILE_SIZE - SCREEN_WIDTH
-        if self.tile_num_y >= SCREEN_HEIGHT - 1:
             if screen_center_y < 0:
                 screen_center_y = 0
             elif screen_center_y > self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT:
                 screen_center_y = self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT + TILE_SIZE
 
-        player_centered = screen_center_x, screen_center_y
+            player_centered = screen_center_x, screen_center_y
 
-        self.camera.move_to(player_centered)
+            self.camera.move_to(player_centered)
 
     # creates a new sprite
     def create_sprite(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):
