@@ -5,3 +5,8 @@ reached level: 12
 in: 649.2s
 score of: 407/1076
 ---
+
+reached level: 10
+in: 890.9s
+score of: 383/710
+---
