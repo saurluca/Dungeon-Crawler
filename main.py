@@ -119,7 +119,7 @@ class Game(arcade.Window):
             arcade.play_sound(self.start_sound, volume=0.5)
 
     def stop_game(self):
-        # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
+        write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
         if SOUND_ON:
             arcade.play_sound(self.game_over_sound, volume=0.5)
 

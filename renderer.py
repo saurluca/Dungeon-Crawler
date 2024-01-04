@@ -101,6 +101,11 @@ class Renderer:
             enemy.center_y = enemies_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
             i += 1
 
+    def update_item_sprites(self, hero_pos):
+        for item in self.item_sprites:
+            if hero_pos == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
+                self.item_sprites.remove(item)
+
     # TODO sound should not be here
     def update_coin_sprites(self, hero_pos):
         for coin in self.coin_sprites:
