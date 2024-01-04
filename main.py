@@ -222,9 +222,6 @@ class Game(arcade.Window):
     # noinspection PyUnusedLocal
 
     def update_things(self, delta_time):
-        if self.level.check_completed():
-            self.advance_to_next_level()
-
         if self.tick % 2 == 0:
             # self.level.move_enemies()
             self.renderer.update_enemy_sprites(self.enemies_lst)
@@ -234,23 +231,27 @@ class Game(arcade.Window):
             self.level.move_player(self.player_change_x, self.player_change_y)
             self.renderer.update_player_sprite(*self.hero.get_position())
 
-        # adds new tiles to scene
-        if not I_SEE_EVERYTHING:
-            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
-            self.renderer.add_new_tiles_to_scene(new_tiles)
+            self.level.gameplay(I_AM_INVINCIBLE)
+            if self.level.check_completed():
+                self.advance_to_next_level()
 
-        if self.level.check_item_collected():
-            self.renderer.update_item_sprites(self.hero.get_position())
+            self.renderer.center_camera_to_player()
 
-        if self.level.check_food_collected():
-            self.renderer.update_food_sprites(self.hero.get_position())
+            # adds new tiles to scene
+            if not I_SEE_EVERYTHING:
+                new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+                self.renderer.add_new_tiles_to_scene(new_tiles)
 
-        if self.level.check_coin_collected():
-            self.renderer.update_coin_sprites(self.hero.get_position())
-            if SOUND_ON:
-                arcade.play_sound(self.coin_sound, volume=0.5)
+            if self.level.check_item_collected():
+                self.renderer.update_item_sprites(self.hero.get_position())
 
-        self.renderer.center_camera_to_player()
+            if self.level.check_food_collected():
+                self.renderer.update_food_sprites(self.hero.get_position())
+
+            if self.level.check_coin_collected():
+                self.renderer.update_coin_sprites(self.hero.get_position())
+                if SOUND_ON:
+                    arcade.play_sound(self.coin_sound, volume=0.5)
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()
