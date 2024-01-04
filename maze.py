@@ -30,6 +30,10 @@ class Maze(MazeGenerator):
     def set_tile(self, x, y, thing):
         self.grid[x][y] = thing
 
+    def move_tile(self, x, y, new_x, new_y):
+        self.grid[new_x][new_y] = self.grid[x][y]
+        self.grid[x][y] = "."
+
     # currently only checking for walls
     def check_obstacle(self, x, y):
         return not self.grid[x][y] == "#"
@@ -44,6 +48,13 @@ class Maze(MazeGenerator):
         free_tile = choice(self.free_tiles)
         self.free_tiles.remove(free_tile)
         return free_tile
+
+    def get_viable_tiles(self, x, y):
+        viable_tiles = []
+        for dx, dy in ((-1, 0), (0, -1), (1, 0), (0, 1)):
+            if self.check_obstacle(x + dx, y + dy):
+                viable_tiles.append((x + dx, y + dy))
+        return viable_tiles
 
     def get_dead_end(self):
         dead_end = choice(self.unused_dead_ends)

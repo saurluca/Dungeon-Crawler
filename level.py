@@ -1,18 +1,24 @@
+from random import choice
+
 from maze import Maze
 from field_of_view import FieldOfView
 from item import Item
 from weapon import Weapon
+from enemy import Enemy
 
 
 class Level:
-    def __init__(self, hero, tile_num_x, tile_num_y, num_coins):
+    def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_enemies, enemies_lst):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
         self.num_coins = num_coins
+        self.num_enemies = num_enemies
         self.item_list = []
 
         self.hero = hero
         self.maze = Maze(self.tile_num_x, self.tile_num_y, 3, 1)
+
+        self.enemies_lst = enemies_lst
 
         self.hero.set_position(*self.maze.get_start_hero_pos())
         self.maze.set_tile(*self.hero.get_position(), self.hero)
@@ -26,6 +32,7 @@ class Level:
         self.generate_items()
 
         self.generate_stair()
+        self.generate_enemies()
 
         self.completed = False
 
@@ -45,7 +52,14 @@ class Level:
         self.maze.set_tile(x, y, "I")
         self.item_list.append(Weapon(x, y, 10))
 
-    # TODO insert enemy generation method here
+    # TODO should enemies be saves in maze?
+    def generate_enemies(self):
+        for i in range(self.num_enemies):
+            pos = self.maze.get_free_tile()
+            enemy = Enemy(*pos)
+            self.maze.set_tile(*pos, enemy)
+            self.enemies_lst.append(enemy)
+
     def move_player(self, dx, dy):
         cx, cy = self.hero.get_position()
         if self.maze.check_obstacle(cx + dx, cy + dy):
@@ -57,6 +71,13 @@ class Level:
         elif self.maze.check_obstacle(cx, cy + dy):
             self.check_special_collision(cx, cy + dy)
             self.hero.set_y(cy + dy)
+
+    def move_enemies(self):
+        for enemy in self.enemies_lst:
+            pos = enemy.get_position()
+            next_pos = choice(self.maze.get_viable_tiles(*pos))
+            self.maze.move_tile(*pos, *next_pos)
+            enemy.set_position(*next_pos)
 
     # add item and other special thing collision here
     def check_special_collision(self, x, y):
@@ -91,6 +112,7 @@ class Level:
         return self.fov.calculate_fov(*self.hero.get_position())
 
     # TODO insert enemy symbol here
+    # TODO, two liner, with in "string"
     # adds to the list of new tiles, the type, so the checking and access to maze is handled in level
     def add_tile_type(self, new_tiles):
         for i in range(len(new_tiles)):
@@ -99,6 +121,8 @@ class Level:
                 new_tiles[i] = (new_tiles[i], "#")
             elif object_type == "c":
                 new_tiles[i] = (new_tiles[i], "c")
+            elif object_type == "E":
+                new_tiles[i] = (new_tiles[i], "E")
             elif object_type == "I":
                 new_tiles[i] = (new_tiles[i], "I")
             elif object_type == "S":
