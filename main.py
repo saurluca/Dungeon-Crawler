@@ -358,9 +358,7 @@ class Game(arcade.Window):
         self.update_food_sprites()
         self.update_item_sprites()
 
-        if not I_AM_INVINCIBLE:
-            self.level.base_hp_loss(self.levels_played)
-            self.player_is_dead = self.hero.is_dead()
+        self.level.gameplay(I_AM_INVINCIBLE)
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()

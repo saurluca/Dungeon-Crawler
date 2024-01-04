@@ -104,10 +104,8 @@ class Level:
                 self.new_coin_collected = True
             elif tile == "F":
                 self.new_food_collected = True
-                self.update_food()
             elif tile == "I":
                 self.new_item_collected = True
-                self.update_items(x, y)
             self.maze.set_tile(x, y, ".")
         if tile == "S":
             print("Oh boy, here we go again")
@@ -137,11 +135,6 @@ class Level:
         return new_tiles
 
     # TODO this function has two purposes, maybe separate
-    def base_hp_loss(self):
-        self.hero.hp -= BASE_HP_LOSS
-        if self.hero.hp <= 0:
-            return True
-        return False
 
     def base_hp_loss(self, factor=1):
         self.hero.hp -= BASE_HP_LOSS * factor
@@ -154,3 +147,11 @@ class Level:
     def update_food(self):
         food = Food(1)
         food.collected(self.hero)
+
+    def gameplay(self, invincibility = False):
+        if self.new_item_collected:
+            self.update_items(self.hero.x, self.hero.y)
+        if self.new_food_collected:
+            self.update_food()
+        if not invincibility:
+            self.hero.hp -= BASE_HP_LOSS
