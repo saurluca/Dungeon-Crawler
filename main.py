@@ -31,9 +31,14 @@ class Game(arcade.Window):
         self.hero = Hero()
         self.level = None
 
+        self.tick_count = 0
+
         # only odd numbers
         self.tile_num_x = 13
         self.tile_num_y = 13
+
+        self.num_enemies = 5
+        self.enemies_lst = []
 
         self.num_coins = 20
         self.total_num_coins = self.num_coins
@@ -49,6 +54,7 @@ class Game(arcade.Window):
         self.player_sprite = None
         self.coin_sprites = None
         self.item_sprites = None
+        self.enemy_sprites = None
 
         # player camera
         self.camera = None
@@ -78,7 +84,7 @@ class Game(arcade.Window):
         arcade.set_background_color(arcade.csscolor.BLACK)
 
     def setup(self):
-        self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins)
+        self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_enemies, self.enemies_lst)
 
         # set up the game camera
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -92,11 +98,13 @@ class Game(arcade.Window):
         self.scene.add_sprite_list("Walls", use_spatial_hash=True)
         self.scene.add_sprite_list("Stairs", use_spatial_hash=True)
         self.scene.add_sprite_list("Coins")
-        self.scene.add_sprite_list("Player")
+        self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite_list("Items")
+        self.scene.add_sprite_list("Player")
 
         self.coin_sprites = self.scene.get_sprite_list("Coins")
         self.item_sprites = self.scene.get_sprite_list("Items")
+        self.enemy_sprites = self.scene.get_sprite_list("Enemies")
 
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
@@ -203,16 +211,18 @@ class Game(arcade.Window):
                 floor_texture = choice(("Tiles/tile_0042.png", "Tiles/tile_0048.png", "Tiles/tile_0049.png"))
                 self.create_sprite(floor_texture, "Floor", *pos)
             if object_type == "c":
-                coin = "Tiles/tile_0003.png"
-                self.create_sprite(coin, "Coins", *pos, COIN_SCALING)
+                coin_texture = "Tiles/tile_0003.png"
+                self.create_sprite(coin_texture, "Coins", *pos, COIN_SCALING)
+            elif object_type == "E":
+                enemy_texture = "Tiles/tile_0124.png"
+                self.create_sprite(enemy_texture, "Enemies", *pos, CHARACTER_SCALING)
+            elif object_type == "I":
+                item_texture = "Tiles/tile_0118.png"
+                self.create_sprite(item_texture, "Items", *pos, ITEM_SCALING)
             # TODO better stair texture, make more obvious
             elif object_type == "S":
                 stair_texture = "Tiles/tile_0039.png"
                 self.create_sprite(stair_texture, "Stairs", *pos)
-            # TODO insert here enemy sprite rendering
-            elif object_type == "I":
-                item = "Tiles/tile_0118.png"
-                self.create_sprite(item, "Items", *pos, ITEM_SCALING)
 
     def update_hp_display(self):
         self.hp_text.text = f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}"
@@ -234,6 +244,13 @@ class Game(arcade.Window):
     def update_player_sprite(self):
         self.player_sprite.center_x = self.hero.get_x() * TILE_SIZE + TILE_SIZE // 2
         self.player_sprite.center_y = self.hero.get_y() * TILE_SIZE + TILE_SIZE // 2
+
+    def update_enemy_sprites(self):
+        i = 0
+        for enemy in self.enemy_sprites:
+            enemy.center_x = self.enemies_lst[i].get_x() * TILE_SIZE + TILE_SIZE // 2
+            enemy.center_y = self.enemies_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
+            i += 1
 
     # score allowed to be here?
     def update_coin_sprites(self):
@@ -288,6 +305,10 @@ class Game(arcade.Window):
 
         self.check_level_completed()
 
+        if self.tick_count % 2 == 0:
+            self.level.move_enemies()
+            self.update_enemy_sprites()
+
         # updates player position
         self.level.move_player(self.player_change_x, self.player_change_y)
 
@@ -315,6 +336,8 @@ class Game(arcade.Window):
         self.update_hp_display()
         self.update_score()
         self.update_display_time()
+
+        self.tick_count += 1
 
 
 def main():
