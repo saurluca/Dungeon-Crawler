@@ -334,9 +334,6 @@ class Game(arcade.Window):
     # noinspection PyUnusedLocal
 
     def update_things(self, delta_time):
-        if self.level.check_completed():
-            self.advance_to_next_level()
-
         if self.tick % 2 == 0:
             # self.level.move_enemies()
             self.update_enemy_sprites()
@@ -344,13 +341,16 @@ class Game(arcade.Window):
         # updates player position
         if self.player_change_x != 0 or self.player_change_y != 0:
             self.level.move_player(self.player_change_x, self.player_change_y)
+            self.level.gameplay(I_AM_INVINCIBLE)
+            if self.level.check_completed():
+                self.advance_to_next_level()
+            self.center_camera_to_player()
+            # adds new tiles to scene
+            if not I_SEE_EVERYTHING:
+                new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+                self.add_new_tiles_to_scene(new_tiles)
 
-        # adds new tiles to scene
-        if not I_SEE_EVERYTHING:
-            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
-            self.add_new_tiles_to_scene(new_tiles)
 
-        self.center_camera_to_player()
 
         # update dynamic sprites
         self.update_player_sprite()
@@ -358,7 +358,7 @@ class Game(arcade.Window):
         self.update_food_sprites()
         self.update_item_sprites()
 
-        self.level.gameplay(I_AM_INVINCIBLE)
+
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()
