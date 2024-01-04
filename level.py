@@ -136,13 +136,6 @@ class Level:
             new_tiles[i] = (new_tiles[i], self.maze(*new_tiles[i]))
         return new_tiles
 
-    # TODO this function has two purposes, maybe separate
-    def base_hp_loss(self):
-        self.hero.hp -= BASE_HP_LOSS
-        if self.hero.hp <= 0:
-            return True
-        return False
-
     def base_hp_loss(self, factor=1):
         self.hero.hp -= BASE_HP_LOSS * factor
 

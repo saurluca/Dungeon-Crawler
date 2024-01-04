@@ -1,9 +1,9 @@
 import arcade
 import time
-from random import choice
 from hero import Hero
 from level import Level
 from read_write import write_down_stats
+from renderer import Renderer
 
 CHARACTER_SCALING = 1.8
 TILE_SCALING = 2.0
@@ -32,6 +32,8 @@ class Game(arcade.Window):
         self.hero = Hero()
         self.level = None
 
+        self.renderer = None
+
         self.tick = 0
         self.player_is_dead = False
 
@@ -52,13 +54,6 @@ class Game(arcade.Window):
 
         # scene is an object containing all sprites that are currently rendered
         self.scene = None
-
-        # player and coin sprite seperated, so they can be changed dynamically
-        self.player_sprite = None
-        self.coin_sprites = None
-        self.item_sprites = None
-        self.food_sprites = None
-        self.enemy_sprites = None
 
         # player camera
         self.camera = None
@@ -92,34 +87,17 @@ class Game(arcade.Window):
 
     def setup(self):
         self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_food, self.num_enemies, self.enemies_lst)
+
+        self.scene = arcade.Scene()
+
         # set up the game camera
         self.camera = arcade.Camera()
 
         # set up ui/ camera, extra so it does not move around like the rest of the game
-        # self.ui_camera = arcade.Camera(self.width, self.height)
+        self.ui_camera = arcade.Camera()
 
-        # sets up the scene, container for sprites
-        self.scene = arcade.Scene()
-        self.scene.add_sprite_list("Floor", use_spatial_hash=True)
-        self.scene.add_sprite_list("Walls", use_spatial_hash=True)
-        self.scene.add_sprite_list("Stairs", use_spatial_hash=True)
-        self.scene.add_sprite_list("Coins")
-        self.scene.add_sprite_list("Food")
-        self.scene.add_sprite_list("Enemies")
-        self.scene.add_sprite_list("Items")
-        self.scene.add_sprite_list("Player")
-
-        self.coin_sprites = self.scene.get_sprite_list("Coins")
-        self.item_sprites = self.scene.get_sprite_list("Items")
-        self.food_sprites = self.scene.get_sprite_list("Food")
-        self.enemy_sprites = self.scene.get_sprite_list("Enemies")
-
-        # sets up the player, rendering at specific location
-        player_texture = "Tiles/tile_0098.png"
-        self.player_sprite = arcade.Sprite(player_texture, TILE_SCALING)
-        self.player_sprite.center_x = self.hero.get_x() * TILE_SIZE + TILE_SIZE // 2
-        self.player_sprite.center_y = self.hero.get_y() * TILE_SIZE + TILE_SIZE // 2
-        self.scene.add_sprite("Player", self.player_sprite)
+        self.renderer = Renderer(self.scene, self.camera, self.ui_camera, self.tile_num_x, self.tile_num_y)
+        self.renderer.set_up(*self.hero.get_position())
 
         # display ui texts
         self.hp_text = arcade.Text(f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
@@ -135,7 +113,7 @@ class Game(arcade.Window):
             for x in range(self.tile_num_x):
                 for y in range(self.tile_num_y):
                     every_tile.append((x, y))
-            self.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
+            self.renderer.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
 
         if SOUND_ON:
             arcade.play_sound(self.start_sound, volume=0.5)
@@ -147,7 +125,7 @@ class Game(arcade.Window):
             arcade.play_sound(self.game_over_sound, volume=0.5)
 
         self.clear()
-        arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, [00, 00, 00, 0.7])
+        arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, (00, 00, 00, 1))
 
         arcade.Text("YOU DIED", SCREEN_HEIGHT // 4, SCREEN_WIDTH // 2, arcade.csscolor.RED, 50).draw()
 
@@ -190,62 +168,6 @@ class Game(arcade.Window):
         elif key == arcade.key.DOWN or key == arcade.key.S:
             self.player_change_y = 0
 
-    # TODO, if maze smaller then window, ugly
-    # moves main camera, so it is centered on player, checks that it does not go out of bounds
-    def center_camera_to_player(self):
-        if self.tile_num_x >= SCREEN_WIDTH // TILE_SIZE and self.tile_num_y >= (SCREEN_HEIGHT - 1) // TILE_SIZE:
-            screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
-            screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
-
-            # Don't let camera travel past 0 or past border
-            if screen_center_x < 0:
-                screen_center_x = 0
-            elif screen_center_x > self.tile_num_x * TILE_SIZE - SCREEN_WIDTH:
-                screen_center_x = self.tile_num_x * TILE_SIZE - SCREEN_WIDTH
-            if screen_center_y < 0:
-                screen_center_y = 0
-            elif screen_center_y > self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT:
-                screen_center_y = self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT + TILE_SIZE
-
-            player_centered = screen_center_x, screen_center_y
-
-            self.camera.move_to(player_centered)
-
-    # creates a new sprite
-    def create_sprite(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):
-        sprite = arcade.Sprite(texture, t_scaling)
-        sprite.center_x = x * TILE_SIZE + TILE_SIZE // 2
-        sprite.center_y = y * TILE_SIZE + TILE_SIZE // 2
-        self.scene.add_sprite(scene_name, sprite)
-
-    # adds the tiles not seen before to the scene
-    def add_new_tiles_to_scene(self, new_tiles):
-        for tile in new_tiles:
-            pos, object_type = tile[0], tile[1]
-            # random walls and floor tiles to make it look nicer
-            if object_type == "#":
-                wall_texture = choice(("Tiles/tile_0014.png", "Tiles/tile_0040.png"))
-                self.create_sprite(wall_texture, "Walls", *pos)
-            else:
-                floor_texture = choice(("Tiles/tile_0042.png", "Tiles/tile_0048.png", "Tiles/tile_0049.png"))
-                self.create_sprite(floor_texture, "Floor", *pos)
-            if object_type == "c":
-                coin_texture = "Tiles/tile_0003.png"
-                self.create_sprite(coin_texture, "Coins", *pos, COIN_SCALING)
-            if object_type == "F":
-                food_texture = "Tiles/tile_0066.png"
-                self.create_sprite(food_texture, "Food", *pos, FOOD_SCALING)
-            elif object_type == "E":
-                enemy_texture = "Tiles/tile_0124.png"
-                self.create_sprite(enemy_texture, "Enemies", *pos, CHARACTER_SCALING)
-            elif object_type == "I":
-                item_texture = "Tiles/tile_0118.png"
-                self.create_sprite(item_texture, "Items", *pos, ITEM_SCALING)
-            # TODO better stair texture, make more obvious
-            elif object_type == "S":
-                stair_texture = "Tiles/tile_0039.png"
-                self.create_sprite(stair_texture, "Stairs", *pos)
-
     def update_hp_display(self):
         if self.hero.hp > 0:
             self.hp_text.text = f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}"
@@ -261,40 +183,6 @@ class Game(arcade.Window):
 
     def update_display_time(self):
         self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
-
-    # repositions player sprite to new position
-    def update_player_sprite(self):
-        self.player_sprite.center_x = self.hero.get_x() * TILE_SIZE + TILE_SIZE // 2
-        self.player_sprite.center_y = self.hero.get_y() * TILE_SIZE + TILE_SIZE // 2
-
-    def update_enemy_sprites(self):
-        i = 0
-        for enemy in self.enemy_sprites:
-            enemy.center_x = self.enemies_lst[i].get_x() * TILE_SIZE + TILE_SIZE // 2
-            enemy.center_y = self.enemies_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
-            i += 1
-
-    # score allowed to be here?
-    # TODO sound should not be here
-    def update_coin_sprites(self):
-        if self.level.check_coin_collected():
-            for coin in self.coin_sprites:
-                if self.hero.get_position() == (int(coin.center_x / TILE_SIZE), int(coin.center_y / TILE_SIZE)):
-                    self.coin_sprites.remove(coin)  #
-            if SOUND_ON:
-                arcade.play_sound(self.coin_sound, volume=0.5)
-
-    def update_food_sprites(self):
-        if self.level.check_food_collected():
-            for food in self.food_sprites:
-                if self.hero.get_position() == (int(food.center_x / TILE_SIZE), int(food.center_y / TILE_SIZE)):
-                    self.food_sprites.remove(food)
-
-    def update_item_sprites(self):
-        if self.level.check_item_collected():
-            for item in self.item_sprites:
-                if self.hero.get_position() == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
-                    self.item_sprites.remove(item)
 
     # background square and text for score, time and hp displayed on the top
     def draw_ui(self):
@@ -339,28 +227,30 @@ class Game(arcade.Window):
 
         if self.tick % 2 == 0:
             # self.level.move_enemies()
-            self.update_enemy_sprites()
+            self.renderer.update_enemy_sprites(self.enemies_lst)
 
-        # updates player position
+        # updates player position, if moved
         if self.player_change_x != 0 or self.player_change_y != 0:
             self.level.move_player(self.player_change_x, self.player_change_y)
+            self.renderer.update_player_sprite(*self.hero.get_position())
 
         # adds new tiles to scene
         if not I_SEE_EVERYTHING:
             new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
-            self.add_new_tiles_to_scene(new_tiles)
+            self.renderer.add_new_tiles_to_scene(new_tiles)
 
-        self.center_camera_to_player()
+        if self.level.check_item_collected():
+            self.renderer.update_item_sprites(self.hero.get_position())
 
-        # update dynamic sprites
-        self.update_player_sprite()
-        self.update_coin_sprites()
-        self.update_food_sprites()
-        self.update_item_sprites()
+        if self.level.check_food_collected():
+            self.renderer.update_food_sprites(self.hero.get_position())
 
-        if not I_AM_INVINCIBLE:
-            self.level.base_hp_loss(self.levels_played)
-            self.player_is_dead = self.hero.is_dead()
+        if self.level.check_coin_collected():
+            self.renderer.update_coin_sprites(self.hero.get_position())
+            if SOUND_ON:
+                arcade.play_sound(self.coin_sound, volume=0.5)
+
+        self.renderer.center_camera_to_player()
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()
