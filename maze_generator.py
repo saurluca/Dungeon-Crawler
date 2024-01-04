@@ -104,11 +104,11 @@ class MazeGenerator:
         # converts it back to a list of separate strings
         return [list(row) for row in border_grid]
 
-    def print_out(self, grid):
-        for row in grid:
-            for tile in row:
-                print(tile, end="")
-            print("")
+    #def print_out(self, grid):
+        #for row in grid:
+            #for tile in row:
+                #print(tile, end="")
+            #print("")
 
     # only uneven x and y num, otherwise ugly
     @staticmethod

@@ -1,5 +1,7 @@
 import arcade
 from random import choice
+
+from enemy import Enemy
 from maze import Maze
 from hero import Hero
 from helper import get_line
@@ -19,7 +21,7 @@ SCREEN_WIDTH = 15 * TILE_SIZE
 SCREEN_HEIGHT = 16 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = True
+I_SEE_EVERYTHING = False
 DIAGONAL_MOVEMENT = True
 
 # either move smooth, half tile or full tile, change update time as well
@@ -28,6 +30,7 @@ VIEW_RANGE = 3 if not I_SEE_EVERYTHING else 40
 
 NUM_COINS = 20
 
+NUM_ENEMIES = 5
 
 class Game(arcade.Window):
     def __init__(self):
@@ -72,6 +75,10 @@ class Game(arcade.Window):
         self.player_change_x = 0
         self.player_change_y = 0
 
+        self.enemies = []
+        self.enemy_sprites = None
+
+
     # TODO loading screen
     def setup(self):
         # sets up and generates the maze
@@ -91,15 +98,17 @@ class Game(arcade.Window):
         self.scene.add_sprite_list("Stairs", use_spatial_hash=True)
         self.scene.add_sprite_list("Coins")
         self.scene.add_sprite_list("Player")
+        self.scene.add_sprite_list("Enemies")
 
         self.coin_sprites = self.scene.get_sprite_list("Coins")
+        self.enemy_sprites = self.scene.get_sprite_list("Enemies")
 
         cx, cy = self.maze.get_a_free_tile()
         self.maze.set_tile(cx, cy, Hero(cx, cy))
 
         # sets up the player, rendering at specific location
-        player_texture = "Tiles/tile_0098.png"
-        self.player_sprite = arcade.Sprite(player_texture, TILE_SCALING)
+        player_texture = "Tiles/hero.png"
+        self.player_sprite = arcade.Sprite(player_texture, 1.1)
         self.player_sprite.center_x = cx * TILE_SIZE + TILE_SIZE // 2
         self.player_sprite.center_y = cy * TILE_SIZE + TILE_SIZE // 2
         self.scene.add_sprite("Player", self.player_sprite)
@@ -108,6 +117,13 @@ class Game(arcade.Window):
         for i in range(NUM_COINS):
             x, y = self.maze.get_a_free_tile()
             self.maze.set_tile(x, y, "c")
+
+        self.enemies = []
+        for i in range(NUM_ENEMIES):
+            x, y = self.maze.get_a_free_tile()
+            self.maze.set_tile(x, y, "e")
+            #self.enemies.append(Enemy(x, y))
+
 
         # checks initial field of view
         self.check_field_of_view(cx, cy)
@@ -264,6 +280,33 @@ class Game(arcade.Window):
             elif self.maze(x, y) == "S":
                 stair_texture = "Tiles/tile_0039.png"
                 self.set_texture(stair_texture, "Stairs", x, y)
+            elif self.maze(x, y) == "e":
+                enemy_texture = "Tiles/tile_0098.png"
+                #self.enemy_sprite = arcade.Sprite(enemy_texture, 1.0)
+                #self.enemy_sprite.center_x = x * TILE_SIZE + TILE_SIZE // 2
+                #self.enemy_sprite.center_y = y * TILE_SIZE + TILE_SIZE // 2
+                #self.enemy_sprites.append = self.enemy_sprite
+                #self.scene.add_sprite("Enemy", self.enemy_sprite)
+                self.set_texture(enemy_texture, "Enemies", x, y)
+                self.enemies.append(Enemy(x, y))
+
+
+    def move_enemies1(self):
+        for en in range(len(self.enemies)):
+            x, y = self.enemies[en].get_position()
+            movement_choice = [-1, 0, 1]
+
+            new_x = x + int(choice(movement_choice))
+            new_y = y + int(choice(movement_choice))
+            while not self.maze.check_obstacle(new_x, new_y):
+                new_x, new_y = (x + int(choice(movement_choice)),
+                                y + int(choice(movement_choice)))
+
+            #ecx, ecy = self.en.get_center()
+            #ecx += new_x * TILE_SIZE
+            #ecy += new_y * TILE_SIZE
+            self.enemy_sprites[en].center_x = new_x * TILE_SIZE + TILE_SIZE // 2
+            self.enemy_sprites[en].center_y = new_y * TILE_SIZE + TILE_SIZE // 2
 
     def set_texture(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):
         sprite = arcade.Sprite(texture, t_scaling)
@@ -303,6 +346,9 @@ class Game(arcade.Window):
 
         # adds new tiles to scene
         self.add_new_tiles()
+
+        self.move_enemies1()
+        #self.move_enemies2()
 
         # collision checks
         self.check_coin_collision(cx, cy)

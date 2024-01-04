@@ -51,3 +51,8 @@ class Maze(MazeGenerator):
     def generate_stair(self):
         x, y = self.get_a_free_tile()
         self.grid[y][x] = "S"
+
+
+if __name__ == '__main__':
+    maze = Maze
+    maze.print_out()
