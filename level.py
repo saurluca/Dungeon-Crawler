@@ -146,10 +146,10 @@ class Level:
         food = Food(1)
         food.collected(self.hero)
 
-    def gameplay(self, invincibility):
+    def gameplay(self, invincibility, levels_played):
         if self.new_item_collected:
             self.update_items(self.hero.x, self.hero.y)
         if self.new_food_collected:
             self.update_food()
         if not invincibility:
-            self.hero.hp -= BASE_HP_LOSS
+            self.hero.hp -= BASE_HP_LOSS * levels_played

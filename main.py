@@ -228,7 +228,7 @@ class Game(arcade.Window):
             self.level.move_player(self.player_change_x, self.player_change_y)
             self.renderer.update_player_sprite(*self.hero.get_position())
 
-            self.level.gameplay(I_AM_INVINCIBLE)
+            self.level.gameplay(I_AM_INVINCIBLE, self.levels_played)
             if self.level.check_completed():
                 self.advance_to_next_level()
 
