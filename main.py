@@ -36,8 +36,8 @@ class Game(arcade.Window):
         self.player_is_dead = False
 
         # only odd numbers
-        self.tile_num_x = 7
-        self.tile_num_y = 7
+        self.tile_num_x = 15
+        self.tile_num_y = 15
 
         self.num_enemies = 1
         self.enemies_lst = []
@@ -88,12 +88,10 @@ class Game(arcade.Window):
             self.game_over_sound = arcade.load_sound("Sounds/dark-souls-you-died.wav")
         #   self.food_sound = arcade.load_sound("")
 
-
         arcade.set_background_color(arcade.csscolor.BLACK)
 
     def setup(self):
         self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_food, self.num_enemies, self.enemies_lst)
-        print("jooo")
         # set up the game camera
         self.camera = arcade.Camera()
 
@@ -378,9 +376,9 @@ class Game(arcade.Window):
 def main():
     game = Game()
     game.setup()
-    game.level.maze.print_out()
+    # game.level.maze.print_out()
 
-    arcade.schedule(game.update_things, 1 / 4)
+    arcade.schedule(game.update_things, 1 / 8)
 
     arcade.run()
 

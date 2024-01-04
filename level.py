@@ -9,6 +9,7 @@ from food import Food
 BASE_HP_LOSS = 5
 BASE_HP_LOSS = 0.01
 
+
 class Level:
     def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_food, num_enemies, enemies_lst):
         self.tile_num_x = tile_num_x
@@ -74,11 +75,9 @@ class Level:
     def move_player(self, dx, dy):
         cx, cy = self.hero.get_position()
         if self.maze.check_obstacle(cx + dx, cy + dy):
-            print(self.maze(cx + dx, cy + dy))
             self.check_special_collision(cx + dx, cy + dy)
             self.maze.move_tile(cx, cy, cx + dx, cy + dy)
             self.hero.set_position(cx + dx, cy + dy)
-
         elif self.maze.check_obstacle(cx + dx, cy):
             self.check_special_collision(cx + dx, cy)
             self.maze.move_tile(cx, cy, cx + dx, cy)
@@ -87,9 +86,6 @@ class Level:
             self.check_special_collision(cx, cy + dy)
             self.maze.move_tile(cx, cy, cx, cy + dy)
             self.hero.set_y(cy + dy)
-
-        self.maze.print_out()
-
 
     def move_enemies(self):
         for enemy in self.enemies_lst:
@@ -112,7 +108,7 @@ class Level:
                 self.update_food()
             elif tile == "I":
                 self.new_item_collected = True
-                self.update_items(x,y)
+                self.update_items(x, y)
             self.maze.set_tile(x, y, ".")
         if tile == "S":
             print("Oh boy, here we go again")
@@ -149,7 +145,7 @@ class Level:
         return False
 
     # TODO this function has two purposes, maybe separate
-    def base_hp_loss(self, factor = 1):
+    def base_hp_loss(self, factor=1):
         self.hero.hp -= BASE_HP_LOSS * factor
 
     def update_items(self, x, y):
