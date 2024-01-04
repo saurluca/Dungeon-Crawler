@@ -8,12 +8,14 @@ from read_write import write_down_stats
 CHARACTER_SCALING = 1.8
 TILE_SCALING = 2.0
 COIN_SCALING = 1.4
+ITEM_SCALING = 1.6
 TILE_SIZE = 32
 
 # height should be width +1, to accommodate the ui
 SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
+# TODO Fix Omnivision
 # cheat mode for full vision
 I_SEE_EVERYTHING = False
 # enables or disables diagonal movement
@@ -87,8 +89,11 @@ class Game(arcade.Window):
         self.scene.add_sprite_list("Stairs", use_spatial_hash=True)
         self.scene.add_sprite_list("Coins")
         self.scene.add_sprite_list("Player")
+        self.scene.add_sprite_list("Items")
 
         self.coin_sprites = self.scene.get_sprite_list("Coins")
+        self.item_sprites = self.scene.get_sprite_list("Items")
+
 
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
@@ -195,6 +200,9 @@ class Game(arcade.Window):
                 stair_texture = "Tiles/tile_0039.png"
                 self.create_sprite(stair_texture, "Stairs", *pos)
             # TODO insert here enemy sprite rendering
+            elif object_type == "I":
+                item = "Tiles/tile_0118.png"
+                self.create_sprite(item, "Items", *pos, ITEM_SCALING)
 
     def update_hp_display(self):
         self.hp_text.text = f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}"
@@ -222,7 +230,11 @@ class Game(arcade.Window):
             for coin in self.coin_sprites:
                 if self.hero.get_position() == (int(coin.center_x / TILE_SIZE), int(coin.center_y / TILE_SIZE)):
                     self.coin_sprites.remove(coin)
-
+    def update_item_sprites(self):
+        if self.level.check_item_collected():
+            for item in self.item_sprites:
+                if self.hero.get_position() == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
+                    self.item_sprites.remove(item)
     # background square and text for score, time and hp displayed on the top
     def draw_ui(self):
         # used as a background to draw on
@@ -275,6 +287,8 @@ class Game(arcade.Window):
         # update dynamic sprites
         self.update_player_sprite()
         self.update_coin_sprites()
+        self.update_item_sprites()
+
         # TODO insert update enemy sprites
 
         # update ui, later, if more stuff, put in extra method

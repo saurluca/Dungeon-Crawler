@@ -3,24 +3,18 @@ from item import Item
 
 class Weapon(Item):
 
-    def __init__(self, damage, view):
-        super().__init__()
-        self._view = view
-
-        self._damage = None
-
-        self.set_damage(damage)
+    def __init__(self, x, y, damage):
+        self.x_pos =  x
+        self.y_pos = y
+        self.damage = damage
 
     # set position by class Item
 
     def set_damage(self, damage):
-        if type(damage) == int:
-            self._damage = damage
-            return True
-        return False
+        self.damage = damage
 
     def dropped(self, hero):
-        hero.set_damage(hero.get_damage - self._damage)
+        hero.set_damage(hero.get_damage - self.damage)
 
-    def picked_up(self, hero):
-        hero.set_damage(hero.get_damage + self._damage)
+    def collected(self, hero):
+        hero.damage += self.damage

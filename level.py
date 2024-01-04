@@ -1,5 +1,7 @@
 from maze import Maze
 from field_of_view import FieldOfView
+from item import Item
+from weapon import Weapon
 
 
 class Level:
@@ -7,6 +9,7 @@ class Level:
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
         self.num_coins = num_coins
+        self.item_list = []
 
         self.hero = hero
         self.maze = Maze(self.tile_num_x, self.tile_num_y, 3, 1)
@@ -18,6 +21,9 @@ class Level:
 
         self.new_coin_collected = False
         self.generate_coins()
+
+        self.new_item_collected = False
+        self.generate_items()
 
         self.generate_stair()
 
@@ -33,8 +39,14 @@ class Level:
         x, y = self.maze.generate_stair_pos2()
         self.maze.set_tile(x, y, "S")
 
-    # TODO insert enemy generation method here
+    # TODO Item generation for different Items
+    def generate_items(self):
+        x, y = self.maze.get_free_tile()
+        self.maze.set_tile(x, y, "I")
+        self.item_list.append(Weapon(x, y, 10))
 
+
+    # TODO insert enemy generation method here
     def move_player(self, dx, dy):
         cx, cy = self.hero.get_position()
         if self.maze.check_obstacle(cx + dx, cy + dy):
@@ -55,6 +67,13 @@ class Level:
             if tile == "c":
                 self.new_coin_collected = True
                 self.maze.set_tile(x, y, ".")
+            elif tile == "I":
+                self.new_item_collected = True
+                self.maze.set_tile(x, y, ".")
+                for item in self.item_list:
+                    if item.x_pos == x and item.y_pos == y:
+                        item.collected(self.hero)
+
             elif tile == "S":
                 print("Oh boy, here we go again")
                 self.completed = True
@@ -64,6 +83,9 @@ class Level:
 
     def check_coin_collected(self):
         return self.new_coin_collected
+
+    def check_item_collected(self):
+        return self.new_item_collected
 
     # calculates the fov and then returns a list of tiles that have not been seen before
     def get_newly_visible_tiles(self):
@@ -78,6 +100,8 @@ class Level:
                 new_tiles[i] = (new_tiles[i], "#")
             elif object_type == "c":
                 new_tiles[i] = (new_tiles[i], "c")
+            elif object_type == "I":
+                new_tiles[i] = (new_tiles[i], "I")
             elif object_type == "S":
                 new_tiles[i] = (new_tiles[i], "S")
             else:
