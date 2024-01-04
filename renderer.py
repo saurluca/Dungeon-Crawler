@@ -117,11 +117,6 @@ class Renderer:
             if hero_pos == (int(food.center_x / TILE_SIZE), int(food.center_y / TILE_SIZE)):
                 self.food_sprites.remove(food)
 
-    def update_item_sprites(self, hero_pos):
-        for item in self.item_sprites:
-            if hero_pos == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
-                self.item_sprites.remove(item)
-
     # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
         if self.tile_num_x >= SCREEN_WIDTH // TILE_SIZE and self.tile_num_y >= (SCREEN_HEIGHT - 1) // TILE_SIZE:

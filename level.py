@@ -63,7 +63,7 @@ class Level:
         self.maze.set_tile(x, y, "I")
         self.item_list.append(Weapon(x, y, 10))
 
-    # TODO should enemies be saves in maze?
+    # TODO should enemies be saved in maze?
     def generate_enemies(self):
         for i in range(self.num_enemies):
             pos = self.maze.get_free_tile()
@@ -146,7 +146,7 @@ class Level:
         food = Food(1)
         food.collected(self.hero)
 
-    def gameplay(self, invincibility = False):
+    def gameplay(self, invincibility):
         if self.new_item_collected:
             self.update_items(self.hero.x, self.hero.y)
         if self.new_food_collected:

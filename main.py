@@ -17,13 +17,13 @@ SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = True
+I_SEE_EVERYTHING = False
 # no damage
 I_AM_INVINCIBLE = False
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 # enables sound files being loaded and played
-SOUND_ON = False
+SOUND_ON = True
 
 
 class Game(arcade.Window):
@@ -41,12 +41,12 @@ class Game(arcade.Window):
         self.tile_num_x = 15
         self.tile_num_y = 15
 
-        self.num_enemies = 1
+        self.num_enemies = 0
         self.enemies_lst = []
 
-        self.num_coins = 3
+        self.num_coins = 20
         self.total_num_coins = self.num_coins
-        self.num_food = 10
+        self.num_food = 2
 
         # used for interaction between level and main class
         self.player_change_x = 0
@@ -81,7 +81,7 @@ class Game(arcade.Window):
             self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
             self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
             self.game_over_sound = arcade.load_sound("Sounds/dark-souls-you-died.wav")
-        #   self.food_sound = arcade.load_sound("")
+            # self.food_sound = arcade.load_sound("")
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
@@ -118,7 +118,6 @@ class Game(arcade.Window):
         if SOUND_ON:
             arcade.play_sound(self.start_sound, volume=0.5)
 
-    # colour [00, 00, 00, 0.7])
     def stop_game(self):
         # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
         if SOUND_ON:
@@ -128,8 +127,6 @@ class Game(arcade.Window):
         arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, (00, 00, 00, 1))
 
         arcade.Text("YOU DIED", SCREEN_HEIGHT // 4, SCREEN_WIDTH // 2, arcade.csscolor.RED, 50).draw()
-
-        # problem was, that the screen never got updated, because never went into on_draw() again
         arcade.finish_render()
 
         time.sleep(3)
