@@ -9,6 +9,7 @@ CHARACTER_SCALING = 1.8
 TILE_SCALING = 2.0
 COIN_SCALING = 1.4
 ITEM_SCALING = 1.6
+FOOD_SCALING = 1.5
 TILE_SIZE = 32
 
 # height should be width +1, to accommodate the ui
@@ -18,7 +19,7 @@ SCREEN_HEIGHT = 20 * TILE_SIZE
 # cheat mode for full vision
 I_SEE_EVERYTHING = True
 # no damage
-I_AM_INVINCIBLE = True
+I_AM_INVINCIBLE = False
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 # enables sound files being loaded and played
@@ -43,6 +44,7 @@ class Game(arcade.Window):
 
         self.num_coins = 3
         self.total_num_coins = self.num_coins
+        self.num_food = 10
 
         # used for interaction between level and main class
         self.player_change_x = 0
@@ -55,6 +57,7 @@ class Game(arcade.Window):
         self.player_sprite = None
         self.coin_sprites = None
         self.item_sprites = None
+        self.food_sprites = None
         self.enemy_sprites = None
 
         # player camera
@@ -83,12 +86,14 @@ class Game(arcade.Window):
             self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
             self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
             self.game_over_sound = arcade.load_sound("Sounds/dark-souls-you-died.wav")
+        #   self.food_sound = arcade.load_sound("")
+
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
     def setup(self):
-        self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_enemies, self.enemies_lst)
-
+        self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_food, self.num_enemies, self.enemies_lst)
+        print("jooo")
         # set up the game camera
         self.camera = arcade.Camera()
 
@@ -101,12 +106,14 @@ class Game(arcade.Window):
         self.scene.add_sprite_list("Walls", use_spatial_hash=True)
         self.scene.add_sprite_list("Stairs", use_spatial_hash=True)
         self.scene.add_sprite_list("Coins")
+        self.scene.add_sprite_list("Food")
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite_list("Items")
         self.scene.add_sprite_list("Player")
 
         self.coin_sprites = self.scene.get_sprite_list("Coins")
         self.item_sprites = self.scene.get_sprite_list("Items")
+        self.food_sprites = self.scene.get_sprite_list("Food")
         self.enemy_sprites = self.scene.get_sprite_list("Enemies")
 
         # sets up the player, rendering at specific location
@@ -227,6 +234,9 @@ class Game(arcade.Window):
             if object_type == "c":
                 coin_texture = "Tiles/tile_0003.png"
                 self.create_sprite(coin_texture, "Coins", *pos, COIN_SCALING)
+            if object_type == "F":
+                food_texture = "Tiles/tile_0066.png"
+                self.create_sprite(food_texture, "Food", *pos, FOOD_SCALING)
             elif object_type == "E":
                 enemy_texture = "Tiles/tile_0124.png"
                 self.create_sprite(enemy_texture, "Enemies", *pos, CHARACTER_SCALING)
@@ -276,6 +286,12 @@ class Game(arcade.Window):
             if SOUND_ON:
                 arcade.play_sound(self.coin_sound, volume=0.5)
 
+    def update_food_sprites(self):
+        if self.level.check_food_collected():
+            for food in self.food_sprites:
+                if self.hero.get_position() == (int(food.center_x / TILE_SIZE), int(food.center_y / TILE_SIZE)):
+                    self.food_sprites.remove(food)
+
     def update_item_sprites(self):
         if self.level.check_item_collected():
             for item in self.item_sprites:
@@ -295,7 +311,8 @@ class Game(arcade.Window):
     # with more coins, and bigger maze
     def advance_to_next_level(self):
         self.update_levels_played()
-        self.num_coins += self.levels_played * 3 + 3
+        self.num_coins += self.levels_played * 2 + 3
+        self.num_food += self.levels_played * 2
         self.total_num_coins += self.num_coins
         # only even numbers, so the end result will be odd
         self.tile_num_x += 2
@@ -340,10 +357,12 @@ class Game(arcade.Window):
         # update dynamic sprites
         self.update_player_sprite()
         self.update_coin_sprites()
+        self.update_food_sprites()
         self.update_item_sprites()
 
-        if self.tick % 10 == 0 and not I_AM_INVINCIBLE:
-            self.player_is_dead = self.level.base_hp_loss()
+        if not I_AM_INVINCIBLE:
+            self.level.base_hp_loss(self.levels_played)
+            self.player_is_dead = self.hero.is_dead()
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()

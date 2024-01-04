@@ -8,3 +8,8 @@ class Hero(Character):
     def __str__(self):
         return "H"
 
+    def is_dead(self):
+        if self.hp <= 0:
+            return True
+        else:
+            return False

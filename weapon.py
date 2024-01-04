@@ -4,7 +4,7 @@ from item import Item
 class Weapon(Item):
 
     def __init__(self, x, y, damage):
-        self.x_pos =  x
+        self.x_pos = x
         self.y_pos = y
         self.damage = damage
 

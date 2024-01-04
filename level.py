@@ -4,17 +4,18 @@ from field_of_view import FieldOfView
 from item import Item
 from weapon import Weapon
 from enemy import Enemy
+from food import Food
 
 BASE_HP_LOSS = 5
-
+BASE_HP_LOSS = 0.01
 
 class Level:
-    def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_enemies, enemies_lst):
-
+    def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_food, num_enemies, enemies_lst):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
         self.num_coins = num_coins
         self.num_enemies = num_enemies
+        self.num_food = num_food
         self.item_list = []
 
         self.hero = hero
@@ -33,6 +34,9 @@ class Level:
         self.new_item_collected = False
         self.generate_items()
 
+        self.new_food_collected = False
+        self.generate_food()
+
         self.generate_stair()
         self.generate_enemies()
 
@@ -49,6 +53,11 @@ class Level:
         self.maze.set_tile(x, y, "S")
 
     # TODO Item generation for different Items
+    def generate_food(self):
+        for i in range(self.num_food):
+            x, y = self.maze.get_free_tile()
+            self.maze.set_tile(x, y, "F")
+
     def generate_items(self):
         x, y = self.maze.get_free_tile()
         self.maze.set_tile(x, y, "I")
@@ -93,20 +102,21 @@ class Level:
     def check_special_collision(self, x, y):
         tile = self.maze(x, y)
         self.new_coin_collected = False
+        self.new_item_collected = False
+        self.new_food_collected = False
         if tile != ".":
             if tile == "c":
                 self.new_coin_collected = True
-                self.maze.set_tile(x, y, ".")
+            elif tile == "F":
+                self.new_food_collected = True
+                self.update_food()
             elif tile == "I":
                 self.new_item_collected = True
-                self.maze.set_tile(x, y, ".")
-                for item in self.item_list:
-                    if item.x_pos == x and item.y_pos == y:
-                        item.collected(self.hero)
-
-            elif tile == "S":
-                print("Oh boy, here we go again")
-                self.completed = True
+                self.update_items(x,y)
+            self.maze.set_tile(x, y, ".")
+        if tile == "S":
+            print("Oh boy, here we go again")
+            self.completed = True
 
     def check_completed(self):
         return self.completed
@@ -116,6 +126,9 @@ class Level:
 
     def check_item_collected(self):
         return self.new_item_collected
+
+    def check_food_collected(self):
+        return self.new_food_collected
 
     # calculates the fov and then returns a list of tiles that have not been seen before
     def get_newly_visible_tiles(self):
@@ -134,3 +147,16 @@ class Level:
         if self.hero.hp <= 0:
             return True
         return False
+
+    # TODO this function has two purposes, maybe separate
+    def base_hp_loss(self, factor = 1):
+        self.hero.hp -= BASE_HP_LOSS * factor
+
+    def update_items(self, x, y):
+        for item in self.item_list:
+            if item.x_pos == x and item.y_pos == y:
+                item.collected(self.hero)
+
+    def update_food(self):
+        food = Food(1)
+        food.collected(self.hero)
