@@ -40,7 +40,7 @@ class Game(arcade.Window):
         self.num_enemies = 5
         self.enemies_lst = []
 
-        self.num_coins = 20
+        self.num_coins = 12
         self.total_num_coins = self.num_coins
 
         # used for interaction between level and main class
@@ -136,15 +136,17 @@ class Game(arcade.Window):
     # colour [00, 00, 00, 0.7])
     def stop_game(self):
         # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
-        arcade.play_sound(self.game_over_sound)
+        arcade.play_sound(self.game_over_sound, volume=0.5)
 
         self.clear()
         arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, [00, 00, 00, 0.7])
 
+        arcade.Text("YOU DIED", SCREEN_HEIGHT//4, SCREEN_WIDTH//2, arcade.csscolor.RED, 50).draw()
+
         # problem was, that the screen never got updated, because never went into on_draw() again
         arcade.finish_render()
 
-        time.sleep(4)
+        time.sleep(3)
         self.close()
 
     # if a key is pressed, changes movement speed in the pressed direction
@@ -286,15 +288,14 @@ class Game(arcade.Window):
     # if player walks on stair, generates new level
     # with more coins, and bigger maze
     # TODO this function checks and changes something, 2 purpose
-    def check_level_completed(self):
-        if self.level.check_completed():
-            self.update_levels_played()
-            self.num_coins += self.levels_played * 2 + 2
-            self.total_num_coins += self.num_coins
-            # only even numbers, so the end result will be odd
-            self.tile_num_x += 2
-            self.tile_num_y += 2
-            self.setup()
+    def advance_to_next_level(self):
+        self.update_levels_played()
+        self.num_coins += self.levels_played * 3 + 3
+        self.total_num_coins += self.num_coins
+        # only even numbers, so the end result will be odd
+        self.tile_num_x += 2
+        self.tile_num_y += 2
+        self.setup()
 
     def on_draw(self):
         # clears the screen
@@ -313,7 +314,8 @@ class Game(arcade.Window):
     # noinspection PyUnusedLocal
 
     def update_things(self, delta_time):
-        self.check_level_completed()
+        if self.level.check_completed():
+            self.advance_to_next_level()
 
         if self.tick % 2 == 0:
             # self.level.move_enemies()
