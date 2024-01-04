@@ -34,8 +34,8 @@ class Game(arcade.Window):
         self.player_is_dead = False
 
         # only odd numbers
-        self.tile_num_x = 13
-        self.tile_num_y = 13
+        self.tile_num_x = 19
+        self.tile_num_y = 19
 
         self.num_enemies = 5
         self.enemies_lst = []
@@ -59,7 +59,7 @@ class Game(arcade.Window):
         # player camera
         self.camera = None
         # camera used for gui elements
-        self.ui_camera = arcade.Camera(self.width, self.height)
+        self.ui_camera = arcade.Camera()
 
         # text display object
         self.hp_text = None
@@ -88,7 +88,7 @@ class Game(arcade.Window):
         self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_enemies, self.enemies_lst)
 
         # set up the game camera
-        self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.camera = arcade.Camera()
 
         # set up ui/ camera, extra so it does not move around like the rest of the game
         # self.ui_camera = arcade.Camera(self.width, self.height)
@@ -185,7 +185,7 @@ class Game(arcade.Window):
     # TODO, if maze smaller then window, ugly
     # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
-        if self.tile_num_x >= SCREEN_WIDTH and self.tile_num_y >= SCREEN_HEIGHT - 1:
+        if self.tile_num_x >= SCREEN_WIDTH//TILE_SIZE and self.tile_num_y >= (SCREEN_HEIGHT - 1)//TILE_SIZE:
             screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
             screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
 
