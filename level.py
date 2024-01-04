@@ -1,5 +1,4 @@
 from random import choice
-
 from maze import Maze
 from field_of_view import FieldOfView
 from item import Item
@@ -114,7 +113,6 @@ class Level:
     def get_newly_visible_tiles(self):
         return self.fov.calculate_fov(*self.hero.get_position())
 
-    # TODO insert enemy symbol here
     # TODO, two liner, with in "string"
     # adds to the list of new tiles, the type, so the checking and access to maze is handled in level
     def add_tile_type(self, new_tiles):
@@ -134,6 +132,7 @@ class Level:
                 new_tiles[i] = (new_tiles[i], "")
         return new_tiles
 
+    # TODO this function has two purposes, maybe separate
     def base_hp_loss(self):
         self.hero.hp -= self.BASE_HP_LOSS
         if self.hero.hp <= 0:

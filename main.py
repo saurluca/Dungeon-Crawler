@@ -15,23 +15,23 @@ TILE_SIZE = 32
 SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
-
-
 # TODO Fix Omnivision
 # cheat mode for full vision
-I_SEE_EVERYTHING = False
+I_SEE_EVERYTHING = True
+# no damage
+I_AM_INVINCIBLE = True
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 
+
 class Game(arcade.Window):
     def __init__(self):
-        self.tick = 0
-        self.player_is_dead = False
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler")
         self.hero = Hero()
         self.level = None
 
-        self.tick_count = 0
+        self.tick = 0
+        self.player_is_dead = False
 
         # only odd numbers
         self.tile_num_x = 13
@@ -77,9 +77,10 @@ class Game(arcade.Window):
         self.time_text = None
 
         # TODO first time sound is played, the game lags
-        # self.collect_coin_sound = arcade.load_sound("Sounds/coin_sound.ogg")
-        # self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
-        # self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
+        self.collect_coin_sound = arcade.load_sound("Sounds/coin_sound.ogg")
+        self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
+        self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
+        self.game_over_sound = arcade.load_sound("Sounds/dark-souls-you-died.wav")
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
@@ -130,16 +131,23 @@ class Game(arcade.Window):
             self.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
 
         # TODO reduce big loading time
-        # arcade.play_sound(self.start_sound, volume=0.5)
+        arcade.play_sound(self.start_sound, volume=0.5)
+
+    # colour [00, 00, 00, 0.7])
+    def stop_game(self):
+        # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
+        arcade.play_sound(self.game_over_sound)
+
+        self.clear()
+        arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, [00, 00, 00, 0.7])
+
+        # problem was, that the screen never got updated, because never went into on_draw() again
+        arcade.finish_render()
+
+        time.sleep(4)
+        self.close()
 
     # if a key is pressed, changes movement speed in the pressed direction
-    def stop_game(self, stop):
-        if stop:
-           # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
-            arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, [00,00,00,0.7])
-          #  time.sleep(3)
-            self.close()
-
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_change_x = 1
@@ -159,7 +167,7 @@ class Game(arcade.Window):
                 self.player_change_x = 0
         # finish game when pressing escape, save current stats
         elif key == arcade.key.ESCAPE:
-            self.stop_game(True)
+            self.stop_game()
 
     # if key is released, resets movement speed in that direction
     def on_key_release(self, key, modifiers):
@@ -172,20 +180,23 @@ class Game(arcade.Window):
         elif key == arcade.key.DOWN or key == arcade.key.S:
             self.player_change_y = 0
 
+    # TODO, if maze smaller then window, ugly
     # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
         screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
         screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
 
         # Don't let camera travel past 0 or past border
-        if screen_center_x < 0:
-            screen_center_x = 0
-        elif screen_center_x > self.tile_num_x * TILE_SIZE - SCREEN_WIDTH:
-            screen_center_x = self.tile_num_x * TILE_SIZE - SCREEN_WIDTH
-        if screen_center_y < 0:
-            screen_center_y = 0
-        elif screen_center_y > self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT:
-            screen_center_y = self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT + TILE_SIZE
+        if self.tile_num_x >= SCREEN_WIDTH:
+            if screen_center_x < 0:
+                screen_center_x = 0
+            elif screen_center_x > self.tile_num_x * TILE_SIZE - SCREEN_WIDTH:
+                screen_center_x = self.tile_num_x * TILE_SIZE - SCREEN_WIDTH
+        if self.tile_num_y >= SCREEN_HEIGHT - 1:
+            if screen_center_y < 0:
+                screen_center_y = 0
+            elif screen_center_y > self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT:
+                screen_center_y = self.tile_num_y * TILE_SIZE - SCREEN_HEIGHT + TILE_SIZE
 
         player_centered = screen_center_x, screen_center_y
 
@@ -226,7 +237,6 @@ class Game(arcade.Window):
     def update_hp_display(self):
         if self.hero.hp > 0:
             self.hp_text.text = f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}"
-
 
     def update_score(self):
         if self.level.check_coin_collected():
@@ -276,6 +286,7 @@ class Game(arcade.Window):
 
     # if player walks on stair, generates new level
     # with more coins, and bigger maze
+    # TODO this function checks and changes something, 2 purpose
     def check_level_completed(self):
         if self.level.check_completed():
             self.update_levels_played()
@@ -303,44 +314,39 @@ class Game(arcade.Window):
     # noinspection PyUnusedLocal
 
     def update_things(self, delta_time):
-        if not self.player_is_dead:
-            self.check_level_completed()
+        self.check_level_completed()
 
-            if self.tick_count % 2 == 0:
-                self.level.move_enemies()
-                self.update_enemy_sprites()
+        if self.tick % 2 == 0:
+            # self.level.move_enemies()
+            self.update_enemy_sprites()
 
-            # updates player position
-            self.level.move_player(self.player_change_x, self.player_change_y)
+        # updates player position
+        self.level.move_player(self.player_change_x, self.player_change_y)
 
-            # adds new tiles to scene
-            if not I_SEE_EVERYTHING:
-                new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
-                self.add_new_tiles_to_scene(new_tiles)
+        # adds new tiles to scene
+        if not I_SEE_EVERYTHING:
+            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+            self.add_new_tiles_to_scene(new_tiles)
 
-            self.center_camera_to_player()
+        self.center_camera_to_player()
 
-            # update dynamic sprites
-            self.update_player_sprite()
-            self.update_coin_sprites()
-            self.update_item_sprites()
+        # update dynamic sprites
+        self.update_player_sprite()
+        self.update_coin_sprites()
+        self.update_item_sprites()
 
-            if self.tick % 10 == 0:
-                self.player_is_dead = self.level.base_hp_loss()
-                self.stop_game(self.player_is_dead)
-
-            print(self.player_is_dead)
-            self.tick += 1
-
-
-        # TODO insert update enemy sprites
+        if self.tick % 10 == 0 and not I_AM_INVINCIBLE:
+            self.player_is_dead = self.level.base_hp_loss()
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()
         self.update_score()
         self.update_display_time()
 
-        self.tick_count += 1
+        self.tick += 1
+
+        if self.player_is_dead:
+            self.stop_game()
 
 
 def main():
