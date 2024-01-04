@@ -23,7 +23,7 @@ I_AM_INVINCIBLE = False
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 # enables sound files being loaded and played
-SOUND_ON = False
+SOUND_ON = True
 
 
 class Game(arcade.Window):
@@ -41,12 +41,12 @@ class Game(arcade.Window):
         self.tile_num_x = 15
         self.tile_num_y = 15
 
-        self.num_enemies = 1
+        self.num_enemies = 0
         self.enemies_lst = []
 
-        self.num_coins = 3
+        self.num_coins = 10
         self.total_num_coins = self.num_coins
-        self.num_food = 10
+        self.num_food = 5
 
         # used for interaction between level and main class
         self.player_change_x = 0
@@ -231,7 +231,7 @@ class Game(arcade.Window):
             self.level.move_player(self.player_change_x, self.player_change_y)
             self.renderer.update_player_sprite(*self.hero.get_position())
 
-            self.level.gameplay(I_AM_INVINCIBLE)
+            self.level.gameplay(I_AM_INVINCIBLE, self.levels_played)
             if self.level.check_completed():
                 self.advance_to_next_level()
 
