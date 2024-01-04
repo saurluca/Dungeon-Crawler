@@ -5,10 +5,10 @@ from item import Item
 from weapon import Weapon
 from enemy import Enemy
 
+BASE_HP_LOSS = 5
+
 
 class Level:
-    BASE_HP_LOSS = 5
-
     def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_enemies, enemies_lst):
 
         self.tile_num_x = tile_num_x
@@ -65,21 +65,29 @@ class Level:
     def move_player(self, dx, dy):
         cx, cy = self.hero.get_position()
         if self.maze.check_obstacle(cx + dx, cy + dy):
+            print(self.maze(cx + dx, cy + dy))
             self.check_special_collision(cx + dx, cy + dy)
+            self.maze.move_tile(cx, cy, cx + dx, cy + dy)
             self.hero.set_position(cx + dx, cy + dy)
+
         elif self.maze.check_obstacle(cx + dx, cy):
             self.check_special_collision(cx + dx, cy)
+            self.maze.move_tile(cx, cy, cx + dx, cy)
             self.hero.set_x(cx + dx)
         elif self.maze.check_obstacle(cx, cy + dy):
             self.check_special_collision(cx, cy + dy)
+            self.maze.move_tile(cx, cy, cx, cy + dy)
             self.hero.set_y(cy + dy)
+
+        self.maze.print_out()
+
 
     def move_enemies(self):
         for enemy in self.enemies_lst:
             pos = enemy.get_position()
             next_pos = choice(self.maze.get_viable_tiles(*pos))
-            self.maze.move_tile(*pos, *next_pos)
             enemy.set_position(*next_pos)
+            self.maze.move_tile(*pos, *next_pos)
 
     # add item and other special thing collision here
     def check_special_collision(self, x, y):
@@ -117,24 +125,12 @@ class Level:
     # adds to the list of new tiles, the type, so the checking and access to maze is handled in level
     def add_tile_type(self, new_tiles):
         for i in range(len(new_tiles)):
-            object_type = self.maze(*new_tiles[i])
-            if object_type == "#":
-                new_tiles[i] = (new_tiles[i], "#")
-            elif object_type == "c":
-                new_tiles[i] = (new_tiles[i], "c")
-            elif object_type == "E":
-                new_tiles[i] = (new_tiles[i], "E")
-            elif object_type == "I":
-                new_tiles[i] = (new_tiles[i], "I")
-            elif object_type == "S":
-                new_tiles[i] = (new_tiles[i], "S")
-            else:
-                new_tiles[i] = (new_tiles[i], "")
+            new_tiles[i] = (new_tiles[i], self.maze(*new_tiles[i]))
         return new_tiles
 
     # TODO this function has two purposes, maybe separate
     def base_hp_loss(self):
-        self.hero.hp -= self.BASE_HP_LOSS
+        self.hero.hp -= BASE_HP_LOSS
         if self.hero.hp <= 0:
             return True
         return False

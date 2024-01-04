@@ -15,13 +15,14 @@ TILE_SIZE = 32
 SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
-# TODO Fix Omnivision
 # cheat mode for full vision
 I_SEE_EVERYTHING = True
 # no damage
 I_AM_INVINCIBLE = True
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
+# enables sound files being loaded and played
+SOUND_ON = False
 
 
 class Game(arcade.Window):
@@ -34,13 +35,13 @@ class Game(arcade.Window):
         self.player_is_dead = False
 
         # only odd numbers
-        self.tile_num_x = 19
-        self.tile_num_y = 19
+        self.tile_num_x = 7
+        self.tile_num_y = 7
 
-        self.num_enemies = 5
+        self.num_enemies = 1
         self.enemies_lst = []
 
-        self.num_coins = 12
+        self.num_coins = 3
         self.total_num_coins = self.num_coins
 
         # used for interaction between level and main class
@@ -76,11 +77,12 @@ class Game(arcade.Window):
         self.start_time = time.time()
         self.time_text = None
 
-        # TODO first time sound is played, the game lags
-        self.collect_coin_sound = arcade.load_sound("Sounds/coin_sound.ogg")
-        self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
-        self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
-        self.game_over_sound = arcade.load_sound("Sounds/dark-souls-you-died.wav")
+        if SOUND_ON:
+            # TODO first time sound is played, the game lags
+            self.coin_sound = arcade.load_sound("Sounds/coin_sound.wav")
+            self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
+            self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
+            self.game_over_sound = arcade.load_sound("Sounds/dark-souls-you-died.wav")
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
@@ -130,18 +132,19 @@ class Game(arcade.Window):
                     every_tile.append((x, y))
             self.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
 
-        # TODO reduce big loading time
-        arcade.play_sound(self.start_sound, volume=0.5)
+        if SOUND_ON:
+            arcade.play_sound(self.start_sound, volume=0.5)
 
     # colour [00, 00, 00, 0.7])
     def stop_game(self):
         # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
-        arcade.play_sound(self.game_over_sound, volume=0.5)
+        if SOUND_ON:
+            arcade.play_sound(self.game_over_sound, volume=0.5)
 
         self.clear()
         arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, [00, 00, 00, 0.7])
 
-        arcade.Text("YOU DIED", SCREEN_HEIGHT//4, SCREEN_WIDTH//2, arcade.csscolor.RED, 50).draw()
+        arcade.Text("YOU DIED", SCREEN_HEIGHT // 4, SCREEN_WIDTH // 2, arcade.csscolor.RED, 50).draw()
 
         # problem was, that the screen never got updated, because never went into on_draw() again
         arcade.finish_render()
@@ -185,7 +188,7 @@ class Game(arcade.Window):
     # TODO, if maze smaller then window, ugly
     # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
-        if self.tile_num_x >= SCREEN_WIDTH//TILE_SIZE and self.tile_num_y >= (SCREEN_HEIGHT - 1)//TILE_SIZE:
+        if self.tile_num_x >= SCREEN_WIDTH // TILE_SIZE and self.tile_num_y >= (SCREEN_HEIGHT - 1) // TILE_SIZE:
             screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
             screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)
 
@@ -264,11 +267,14 @@ class Game(arcade.Window):
             i += 1
 
     # score allowed to be here?
+    # TODO sound should not be here
     def update_coin_sprites(self):
         if self.level.check_coin_collected():
             for coin in self.coin_sprites:
                 if self.hero.get_position() == (int(coin.center_x / TILE_SIZE), int(coin.center_y / TILE_SIZE)):
-                    self.coin_sprites.remove(coin)
+                    self.coin_sprites.remove(coin)  #
+            if SOUND_ON:
+                arcade.play_sound(self.coin_sound, volume=0.5)
 
     def update_item_sprites(self):
         if self.level.check_item_collected():
@@ -287,7 +293,6 @@ class Game(arcade.Window):
 
     # if player walks on stair, generates new level
     # with more coins, and bigger maze
-    # TODO this function checks and changes something, 2 purpose
     def advance_to_next_level(self):
         self.update_levels_played()
         self.num_coins += self.levels_played * 3 + 3
@@ -322,7 +327,8 @@ class Game(arcade.Window):
             self.update_enemy_sprites()
 
         # updates player position
-        self.level.move_player(self.player_change_x, self.player_change_y)
+        if self.player_change_x != 0 or self.player_change_y != 0:
+            self.level.move_player(self.player_change_x, self.player_change_y)
 
         # adds new tiles to scene
         if not I_SEE_EVERYTHING:
@@ -353,9 +359,9 @@ class Game(arcade.Window):
 def main():
     game = Game()
     game.setup()
-    # game.level.maze.print_out()
+    game.level.maze.print_out()
 
-    arcade.schedule(game.update_things, 1 / 8)
+    arcade.schedule(game.update_things, 1 / 4)
 
     arcade.run()
 
