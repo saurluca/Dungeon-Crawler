@@ -5,6 +5,7 @@ from weapon import Weapon
 
 
 class Level:
+    BASE_HP_LOSS = 1
     def __init__(self, hero, tile_num_x, tile_num_y, num_coins):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
@@ -106,3 +107,8 @@ class Level:
             else:
                 new_tiles[i] = (new_tiles[i], "")
         return new_tiles
+    def base_hp_loss(self):
+        self.hero.hp -= self.BASE_HP_LOSS
+        if self.hero.hp <= 0:
+            return True
+        return False

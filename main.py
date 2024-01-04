@@ -17,13 +17,16 @@ SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # TODO Fix Omnivision
 # cheat mode for full vision
-I_SEE_EVERYTHING = True
+I_SEE_EVERYTHING = False
 # enables or disables diagonal movement
 DIAGONAL_MOVEMENT = True
 
 
+
+
 class Game(arcade.Window):
     def __init__(self):
+        self.TICK = 0
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler")
         self.hero = Hero()
         self.level = None
@@ -103,9 +106,9 @@ class Game(arcade.Window):
         self.scene.add_sprite("Player", self.player_sprite)
 
         # display ui texts
-        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
+        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
                                    arcade.csscolor.GREEN, 18, bold=True)
-        self.score_text = arcade.Text(f"Score: {self.score} / {self.total_num_coins}", 8 + 4 * TILE_SIZE + 16, SCREEN_HEIGHT - 24,
+        self.score_text = arcade.Text(f"Score: {self.score} / {self.total_num_coins}", 8 + 5 * TILE_SIZE + 16, SCREEN_HEIGHT - 24,
                                       arcade.csscolor.BLACK, 18)
         self.level_played_text = arcade.Text(f"Level: {self.levels_played}", 8 + 10 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 14 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
@@ -122,6 +125,14 @@ class Game(arcade.Window):
         # arcade.play_sound(self.start_sound, volume=0.5)
 
     # if a key is pressed, changes movement speed in the pressed direction
+    def stop_game(self, stop):
+        if stop:
+            write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
+            print("yay")
+            arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, [00,00,00,0.7])
+            time.sleep(3)
+            self.close()
+
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT or key == arcade.key.D:
             self.player_change_x = 1
@@ -141,8 +152,7 @@ class Game(arcade.Window):
                 self.player_change_x = 0
         # finish game when pressing escape, save current stats
         elif key == arcade.key.ESCAPE:
-            write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
-            self.close()
+            self.stop_game()
 
     # if key is released, resets movement speed in that direction
     def on_key_release(self, key, modifiers):
@@ -205,7 +215,8 @@ class Game(arcade.Window):
                 self.create_sprite(item, "Items", *pos, ITEM_SCALING)
 
     def update_hp_display(self):
-        self.hp_text.text = f"HP: {self.hero.get_hp()} / {self.hero.get_max_hp()}"
+        self.hp_text.text = f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}"
+        print(f"yay+ {self.TICK}")
 
     def update_score(self):
         if self.level.check_coin_collected():
@@ -274,6 +285,7 @@ class Game(arcade.Window):
 
     # noinspection PyUnusedLocal
     def update_things(self, delta_time):
+
         self.check_level_completed()
 
         # updates player position
@@ -290,6 +302,12 @@ class Game(arcade.Window):
         self.update_player_sprite()
         self.update_coin_sprites()
         self.update_item_sprites()
+
+        if self.TICK % 10 == 0:
+            self.stop_game(self.level.base_hp_loss())
+
+        self.TICK += 1
+
 
         # TODO insert update enemy sprites
 
