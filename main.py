@@ -247,13 +247,15 @@ class Game(arcade.Window):
 
             if self.level.check_coin_collected():
                 self.renderer.update_coin_sprites(self.hero.get_position())
+                self.update_score()
                 if SOUND_ON:
                     arcade.play_sound(self.coin_sound, volume=0.5)
 
         # update ui, later, if more stuff, put in extra method
         self.update_hp_display()
-        self.update_score()
         self.update_display_time()
+
+        self.level.reset_new_collected_vars()
 
         self.tick += 1
 
