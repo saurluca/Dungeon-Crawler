@@ -26,6 +26,9 @@ class Renderer:
 
         # player and coin sprite seperated, so they can be changed dynamically
         self.player_sprite = None
+        self.coin_sprites = None
+        self.item_sprites = None
+        self.food_sprites = None
         self.enemy_sprites = None
 
     def set_up(self, hero_x, hero_y):
@@ -39,7 +42,10 @@ class Renderer:
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite_list("Player")
 
-        self.player_sprite = arcade.Sprite("")
+        self.coin_sprites = self.scene.get_sprite_list("Coins")
+        self.item_sprites = self.scene.get_sprite_list("Items")
+        self.food_sprites = self.scene.get_sprite_list("Food")
+        self.enemy_sprites = self.scene.get_sprite_list("Enemies")
 
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
@@ -69,7 +75,7 @@ class Renderer:
             if object_type == "c":
                 coin_texture = "Tiles/tile_0003.png"
                 self.create_sprite(coin_texture, "Coins", *pos, COIN_SCALING)
-            elif object_type == "F":
+            if object_type == "F":
                 food_texture = "Tiles/tile_0066.png"
                 self.create_sprite(food_texture, "Food", *pos, FOOD_SCALING)
             elif object_type == "E":
@@ -90,29 +96,29 @@ class Renderer:
 
     def update_enemy_sprites(self, enemies_lst):
         i = 0
-        for enemy in self.scene.get_sprite_list("Enemies"):
+        for enemy in self.enemy_sprites:
             enemy.center_x = enemies_lst[i].get_x() * TILE_SIZE + TILE_SIZE // 2
             enemy.center_y = enemies_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
             i += 1
 
     def update_item_sprites(self, hero_pos):
-        for item in self.scene.get_sprite_list("Items"):
+        for item in self.item_sprites:
             if hero_pos == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
-                self.scene.get_sprite_list("Items").remove(item)
+                self.item_sprites.remove(item)
 
+    # TODO sound should not be here
     def update_coin_sprites(self, hero_pos):
-        for coin in self.scene.get_sprite_list("Coins"):
+        for coin in self.coin_sprites:
             if hero_pos == (int(coin.center_x / TILE_SIZE), int(coin.center_y / TILE_SIZE)):
-                self.scene.get_sprite_list("Coins").remove(coin)
+                self.coin_sprites.remove(coin)
 
     def update_food_sprites(self, hero_pos):
-        for food in self.scene.get_sprite_list("Food"):
+        for food in self.food_sprites:
             if hero_pos == (int(food.center_x / TILE_SIZE), int(food.center_y / TILE_SIZE)):
-                self.scene.get_sprite_list("Food").remove(food)
+                self.food_sprites.remove(food)
 
     # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
-        # this checks if the maze is smaller than the screen, then it does not move the camera
         if self.tile_num_x >= SCREEN_WIDTH // TILE_SIZE and self.tile_num_y >= (SCREEN_HEIGHT - 1) // TILE_SIZE:
             screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
             screen_center_y = self.player_sprite.center_y - (self.camera.viewport_height / 2)

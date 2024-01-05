@@ -16,13 +16,52 @@ in: 31.0s
 score of: 26/124
 ---
 
-red
-reached level: 16
-in: 861.4s
-score of: 1153/2280
----
-lol
 reached level: 1
-in: 56.5s
-score of: 16/20
+in: 2.7s
+score of: 0/20
+---
+dmd
+reached level: 1
+in: 2.6s
+score of: 4/20
+---
+d
+reached level: 1
+in: 2.6s
+score of: 0/20
+---
+
+reached level: 1
+in: 2.6s
+score of: 0/20
+---
+s
+reached level: 1
+in: 2.6s
+score of: 0/20
+---
+
+reached level: 2
+in: 24.1s
+score of: 20/46
+---
+
+reached level: 2
+in: 24.1s
+score of: 8/46
+---
+name
+reached level: 1
+in: 24.6s
+score of: 11/20
+---
+
+reached level: 1
+in: 24.2s
+score of: 9/20
+---
+red
+reached level: 1
+in: 1.6s
+score of: 1/20
 ---

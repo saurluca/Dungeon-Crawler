@@ -96,6 +96,9 @@ class Level:
     # add item and other special thing collision here
     def check_special_collision(self, x, y):
         tile = self.maze(x, y)
+        self.new_coin_collected = False
+        self.new_item_collected = False
+        self.new_food_collected = False
         if tile != ".":
             if tile == "c":
                 self.new_coin_collected = True
@@ -119,11 +122,6 @@ class Level:
 
     def check_food_collected(self):
         return self.new_food_collected
-
-    def reset_new_collected_vars(self):
-        self.new_coin_collected = False
-        self.new_item_collected = False
-        self.new_food_collected = False
 
     # calculates the fov and then returns a list of tiles that have not been seen before
     def get_newly_visible_tiles(self):
