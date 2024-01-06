@@ -254,6 +254,8 @@ class Game(arcade.Window):
         self.update_hp_display()
         self.update_score()
         self.update_display_time()
+        
+        self.level.reset_collected_status()
 
         self.tick += 1
 
@@ -262,8 +264,10 @@ class Game(arcade.Window):
 
 
 def main():
+    start_time = time.time()
     game = Game()
     game.setup()
+    print(time.time() - start_time)
     # game.level.maze.print_out()
 
     arcade.schedule(game.update_things, 1 / 8)

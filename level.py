@@ -96,9 +96,6 @@ class Level:
     # add item and other special thing collision here
     def check_special_collision(self, x, y):
         tile = self.maze(x, y)
-        self.new_coin_collected = False
-        self.new_item_collected = False
-        self.new_food_collected = False
         if tile != ".":
             if tile == "c":
                 self.new_coin_collected = True
@@ -145,6 +142,11 @@ class Level:
     def update_food(self):
         food = Food(1)
         food.collected(self.hero)
+
+    def reset_collected_status(self):
+        self.new_coin_collected = False
+        self.new_item_collected = False
+        self.new_food_collected = False
 
     def gameplay(self, invincibility, levels_played):
         if self.new_item_collected:

@@ -9,7 +9,4 @@ class Hero(Character):
         return "H"
 
     def is_dead(self):
-        if self.hp <= 0:
-            return True
-        else:
-            return False
+        return self.hp <= 0

@@ -36,16 +36,11 @@ class Renderer:
         self.scene.add_sprite_list("Floor", use_spatial_hash=True)
         self.scene.add_sprite_list("Walls", use_spatial_hash=True)
         self.scene.add_sprite_list("Stairs", use_spatial_hash=True)
-        self.scene.add_sprite_list("Coins")
-        self.scene.add_sprite_list("Food")
-        self.scene.add_sprite_list("Items")
+        self.scene.add_sprite_list("Coins", use_spatial_hash=True)
+        self.scene.add_sprite_list("Food", use_spatial_hash=True)
+        self.scene.add_sprite_list("Items", use_spatial_hash=True)
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite_list("Player")
-
-        self.coin_sprites = self.scene.get_sprite_list("Coins")
-        self.item_sprites = self.scene.get_sprite_list("Items")
-        self.food_sprites = self.scene.get_sprite_list("Food")
-        self.enemy_sprites = self.scene.get_sprite_list("Enemies")
 
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
@@ -96,26 +91,26 @@ class Renderer:
 
     def update_enemy_sprites(self, enemies_lst):
         i = 0
-        for enemy in self.enemy_sprites:
+        for enemy in self.scene.get_sprite_list("Enemies"):
             enemy.center_x = enemies_lst[i].get_x() * TILE_SIZE + TILE_SIZE // 2
             enemy.center_y = enemies_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
             i += 1
 
     def update_item_sprites(self, hero_pos):
-        for item in self.item_sprites:
+        for item in self.scene.get_sprite_list("Items"):
             if hero_pos == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
-                self.item_sprites.remove(item)
+                self.scene.get_sprite_list("Items").remove(item)
 
     # TODO sound should not be here
     def update_coin_sprites(self, hero_pos):
-        for coin in self.coin_sprites:
+        for coin in self.scene.get_sprite_list("Coins"):
             if hero_pos == (int(coin.center_x / TILE_SIZE), int(coin.center_y / TILE_SIZE)):
-                self.coin_sprites.remove(coin)
+                self.scene.get_sprite_list("Coins").remove(coin)
 
     def update_food_sprites(self, hero_pos):
-        for food in self.food_sprites:
+        for food in self.scene.get_sprite_list("Food"):
             if hero_pos == (int(food.center_x / TILE_SIZE), int(food.center_y / TILE_SIZE)):
-                self.food_sprites.remove(food)
+                self.scene.get_sprite_list("Food").remove(food)
 
     # moves main camera, so it is centered on player, checks that it does not go out of bounds
     def center_camera_to_player(self):
