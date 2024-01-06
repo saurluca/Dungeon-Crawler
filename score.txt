@@ -65,3 +65,8 @@ reached level: 1
 in: 1.6s
 score of: 1/20
 ---
+red
+reached level: 1
+in: 3.0s
+num_coins_collected of: 0/20
+---

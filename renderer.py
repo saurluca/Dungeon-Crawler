@@ -15,23 +15,28 @@ SCREEN_HEIGHT = 20 * TILE_SIZE
 
 
 class Renderer:
-    def __init__(self, scene, camera, ui_camera, tile_num_x, tile_num_y):
-        self.scene = scene
+    def __init__(self):
+        # scene is an object containing all sprites that are currently rendered
+        self.scene = None
 
-        self.camera = camera
-        self.ui_camera = ui_camera
+        # player camera
+        self.camera = None
+
+        self.tile_num_x = None
+        self.tile_num_y = None
+
+        # player and coin sprite seperated, so they can be changed dynamically
+        self.player_sprite = None
+        self.enemy_sprites = None
+
+    def set_up(self, tile_num_x, tile_num_y, hero_x, hero_y):
+        self.scene = arcade.Scene()
+
+        self.camera = arcade.Camera()
 
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
 
-        # player and coin sprite seperated, so they can be changed dynamically
-        self.player_sprite = None
-        self.coin_sprites = None
-        self.item_sprites = None
-        self.food_sprites = None
-        self.enemy_sprites = None
-
-    def set_up(self, hero_x, hero_y):
         # sets up the scene, container for sprites
         self.scene.add_sprite_list("Floor", use_spatial_hash=True)
         self.scene.add_sprite_list("Walls", use_spatial_hash=True)
@@ -48,6 +53,12 @@ class Renderer:
         self.player_sprite.center_x = hero_x * TILE_SIZE + TILE_SIZE // 2
         self.player_sprite.center_y = hero_y * TILE_SIZE + TILE_SIZE // 2
         self.scene.add_sprite("Player", self.player_sprite)
+
+    def draw_scene(self):
+        # draws what is in view of the camera
+        self.camera.use()
+
+        self.scene.draw()
 
     # creates a new sprite
     def create_sprite(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):

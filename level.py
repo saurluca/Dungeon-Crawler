@@ -148,6 +148,7 @@ class Level:
         self.new_item_collected = False
         self.new_food_collected = False
 
+    # TODO this means the hero only loses hp if he is moving. Okay?
     def gameplay(self, invincibility, levels_played):
         if self.new_item_collected:
             self.update_items(self.hero.x, self.hero.y)

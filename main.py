@@ -4,6 +4,7 @@ from hero import Hero
 from level import Level
 from read_write import write_down_stats
 from renderer import Renderer
+from ui import UI
 
 CHARACTER_SCALING = 1.8
 TILE_SCALING = 2.0
@@ -29,10 +30,16 @@ SOUND_ON = True
 class Game(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler")
-        self.hero = Hero()
-        self.level = None
 
-        self.renderer = None
+        # keeps track of time spent in a level
+        self.start_time = time.time()
+
+        self.hero = Hero()
+
+        self.renderer = Renderer()
+        self.ui = UI(SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE, self.start_time)
+
+        self.level = None
 
         self.tick = 0
         self.player_is_dead = False
@@ -46,37 +53,19 @@ class Game(arcade.Window):
 
         self.num_coins = 20
         self.total_num_coins = self.num_coins
+        self.num_coins_collected = 0
+
         self.num_food = 2
 
         # used for interaction between level and main class
         self.player_change_x = 0
         self.player_change_y = 0
 
-        # scene is an object containing all sprites that are currently rendered
-        self.scene = None
-
-        # player camera
-        self.camera = None
-        # camera used for gui elements
-        self.ui_camera = arcade.Camera()
-
-        # text display object
-        self.hp_text = None
-
-        # keeps track of and displays the score, currently coins collected
-        self.score = 0
-        self.score_text = None
-
         # keeps track of number of levels played
         self.levels_played = 1
-        self.level_played_text = None
-
-        # keeps track of time spent in a level
-        self.start_time = time.time()
-        self.time_text = None
 
         if SOUND_ON:
-            # TODO first time sound is played, the game lags
+            # TODO .wav or .ogg?
             self.coin_sound = arcade.load_sound("Sounds/coin_sound.wav")
             self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
             self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
@@ -88,49 +77,23 @@ class Game(arcade.Window):
     def setup(self):
         self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_food, self.num_enemies, self.enemies_lst)
 
-        self.scene = arcade.Scene()
+        self.renderer.set_up(self.tile_num_x, self.tile_num_y, *self.hero.get_position())
 
-        # set up the game camera
-        self.camera = arcade.Camera()
+        self.ui.set_up(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
-        # set up ui/ camera, extra so it does not move around like the rest of the game
-        self.ui_camera = arcade.Camera()
-
-        self.renderer = Renderer(self.scene, self.camera, self.ui_camera, self.tile_num_x, self.tile_num_y)
-        self.renderer.set_up(*self.hero.get_position())
-
-        # display ui texts
-        self.hp_text = arcade.Text(f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
-                                   arcade.csscolor.GREEN, 18, bold=True)
-        self.score_text = arcade.Text(f"Score: {self.score} / {self.total_num_coins}", 8 + 5 * TILE_SIZE + 16, SCREEN_HEIGHT - 24,
-                                      arcade.csscolor.BLACK, 18)
-        self.level_played_text = arcade.Text(f"Level: {self.levels_played}", 8 + 10 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
-        self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 14 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
-
-        # Cheat mode to see everything
+        # initial rendering of tiles in view, see everything, every tile, duh
         if I_SEE_EVERYTHING:
             every_tile = []
             for x in range(self.tile_num_x):
                 for y in range(self.tile_num_y):
                     every_tile.append((x, y))
             self.renderer.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
+        else:
+            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+            self.renderer.add_new_tiles_to_scene(new_tiles)
 
         if SOUND_ON:
             arcade.play_sound(self.start_sound, volume=0.5)
-
-    def stop_game(self):
-        write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.score, self.total_num_coins)
-        if SOUND_ON:
-            arcade.play_sound(self.game_over_sound, volume=0.5)
-
-        self.clear()
-        arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, (00, 00, 00, 1))
-
-        arcade.Text("YOU DIED", SCREEN_HEIGHT // 4, SCREEN_WIDTH // 2, arcade.csscolor.RED, 50).draw()
-        arcade.finish_render()
-
-        time.sleep(3)
-        self.close()
 
     # if a key is pressed, changes movement speed in the pressed direction
     def on_key_press(self, key, modifiers):
@@ -165,59 +128,44 @@ class Game(arcade.Window):
         elif key == arcade.key.DOWN or key == arcade.key.S:
             self.player_change_y = 0
 
-    def update_hp_display(self):
-        if self.hero.hp > 0:
-            self.hp_text.text = f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}"
-
-    def update_score(self):
-        if self.level.check_coin_collected():
-            self.score += 1
-        self.score_text.text = f"Score: {self.score} / {self.total_num_coins}"
-
-    def update_levels_played(self):
-        self.levels_played += 1
-        self.level_played_text.text = f"Level: {self.levels_played}"
-
-    def update_display_time(self):
-        self.time_text.text = f"Time: {round(time.time() - self.start_time, 1)}"
-
-    # background square and text for score, time and hp displayed on the top
-    def draw_ui(self):
-        # used as a background to draw on
-        arcade.draw_rectangle_filled(0, SCREEN_HEIGHT - TILE_SIZE / 2, SCREEN_WIDTH * 2, TILE_SIZE, arcade.csscolor.SADDLE_BROWN)
-        self.hp_text.draw()
-        self.score_text.draw()
-        self.level_played_text.draw()
-        self.time_text.draw()
-
     # if player walks on stair, generates new level
-    # with more coins, and bigger maze
     def advance_to_next_level(self):
-        self.update_levels_played()
+        self.levels_played += 1
+        self.ui.update_levels_played(self.levels_played)
+
+        # TODO make distribution relative to total free tiles
         self.num_coins += self.levels_played * 2 + 3
-        self.num_food += self.levels_played * 2
         self.total_num_coins += self.num_coins
+        self.num_food += self.levels_played * 2
+
         # only even numbers, so the end result will be odd
         self.tile_num_x += 2
         self.tile_num_y += 2
         self.setup()
 
+    def stop_game(self):
+        # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.num_coins_collected, self.total_num_coins)
+        if SOUND_ON:
+            arcade.play_sound(self.game_over_sound, volume=0.5)
+
+        self.clear()
+        arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, (00, 00, 00, 1))
+
+        arcade.Text("YOU DIED", SCREEN_HEIGHT // 4, SCREEN_WIDTH // 2, arcade.csscolor.RED, 50).draw()
+        arcade.finish_render()
+
+        time.sleep(4)
+        self.close()
+
     def on_draw(self):
         # clears the screen
         self.clear()
 
-        # camera for main game
-        self.camera.use()
+        self.renderer.draw_scene()
 
-        self.scene.draw()
-
-        # camera for ui
-        self.ui_camera.use()
-
-        self.draw_ui()
+        self.ui.draw_ui()
 
     # noinspection PyUnusedLocal
-
     def update_things(self, delta_time):
         if self.tick % 2 == 0:
             # self.level.move_enemies()
@@ -246,15 +194,14 @@ class Game(arcade.Window):
                 self.renderer.update_food_sprites(self.hero.get_position())
 
             if self.level.check_coin_collected():
+                self.num_coins_collected += 1
                 self.renderer.update_coin_sprites(self.hero.get_position())
+                self.ui.update_score(self.num_coins_collected, self.total_num_coins)
                 if SOUND_ON:
                     arcade.play_sound(self.coin_sound, volume=0.5)
 
-        # update ui, later, if more stuff, put in extra method
-        self.update_hp_display()
-        self.update_score()
-        self.update_display_time()
-        
+        self.ui.update_hp_display(self.hero.get_hp(), self.hero.get_max_hp())
+        self.ui.update_display_time()
         self.level.reset_collected_status()
 
         self.tick += 1
@@ -266,8 +213,9 @@ class Game(arcade.Window):
 def main():
     start_time = time.time()
     game = Game()
+    print(f"boot up time 1: {round(time.time() - start_time, 2)}")
     game.setup()
-    print(time.time() - start_time)
+    print(f"boot up time 2: {round(time.time() - start_time, 2)}")
     # game.level.maze.print_out()
 
     arcade.schedule(game.update_things, 1 / 8)
