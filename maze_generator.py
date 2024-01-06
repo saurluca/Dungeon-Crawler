@@ -1,6 +1,7 @@
 import time
 from random import choice, randint
 
+
 # TODO different type of maze, with connecting passages?
 def check_unvisited_neighbors(current_cell, visited, tile_num_x, tile_num_y):
     open_neighbors = []

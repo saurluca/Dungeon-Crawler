@@ -51,7 +51,7 @@ class Game(arcade.Window):
         self.num_enemies = 0
         self.enemies_lst = []
 
-        self.num_coins = 20
+        self.num_coins = self.calculate_num_open_tiles() // 5
         self.total_num_coins = self.num_coins
         self.num_coins_collected = 0
 
@@ -128,19 +128,28 @@ class Game(arcade.Window):
         elif key == arcade.key.DOWN or key == arcade.key.S:
             self.player_change_y = 0
 
+    # TODO where should this method go?
+    # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
+    def calculate_num_open_tiles(self):
+        return 2 * ((self.tile_num_x - 2) // 2 + 1) * ((self.tile_num_y - 2) // 2 + 1)
+
     # if player walks on stair, generates new level
     def advance_to_next_level(self):
         self.levels_played += 1
         self.ui.update_levels_played(self.levels_played)
 
-        # TODO make distribution relative to total free tiles
-        self.num_coins += self.levels_played * 2 + 3
-        self.total_num_coins += self.num_coins
-        self.num_food += self.levels_played * 2
-
         # only even numbers, so the end result will be odd
         self.tile_num_x += 2
         self.tile_num_y += 2
+
+        num_open_tiles = self.calculate_num_open_tiles()
+
+        # TODO adjust coin and food distribution
+        self.num_coins = num_open_tiles // 5
+        self.total_num_coins += self.num_coins
+        self.num_food = num_open_tiles // 6
+
+        print("Oh boy, here we go again")
         self.setup()
 
     def stop_game(self):

@@ -16,14 +16,6 @@ class UI:
         self.level_played_text = arcade.Text("", 8 + 10 * tile_size + 16, screen_height - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text("", 8 + 14 * tile_size, screen_height - 24, arcade.csscolor.BLACK, 18)
 
-        # self.hp_text = arcade.Text(f"HP: {self.hero.get_hp():.1f} / {self.hero.get_max_hp()}", 8, SCREEN_HEIGHT - 24,
-        #                            arcade.csscolor.GREEN, 18, bold=True)
-        # self.score_text = arcade.Text(f"Score: {self.num_coins_collected} / {self.total_num_coins}", 8 + 5 * TILE_SIZE + 16, SCREEN_HEIGHT - 24,
-        #                               arcade.csscolor.BLACK, 18)
-        # self.level_played_text = arcade.Text(f"Level: {self.levels_played}", 8 + 10 * TILE_SIZE + 16, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
-        # self.time_text = arcade.Text(f"Time: {self.start_time}", 8 + 14 * TILE_SIZE, SCREEN_HEIGHT - 24, arcade.csscolor.BLACK, 18)
-        #
-
     def set_up(self, hero_hp, hero_max_hp, coins_collected, total_num_coins, levels_played):
         self.update_hp_display(hero_hp, hero_max_hp)
         self.update_score(coins_collected, total_num_coins)
@@ -55,4 +47,3 @@ class UI:
         self.score_text.draw()
         self.level_played_text.draw()
         self.time_text.draw()
-

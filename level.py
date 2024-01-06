@@ -105,7 +105,6 @@ class Level:
                 self.new_item_collected = True
             self.maze.set_tile(x, y, ".")
         if tile == "S":
-            print("Oh boy, here we go again")
             self.completed = True
 
     def check_completed(self):
