@@ -16,7 +16,7 @@ class UI:
         self.level_played_text = arcade.Text("", 8 + 10 * tile_size + 16, screen_height - 24, arcade.csscolor.BLACK, 18)
         self.time_text = arcade.Text("", 8 + 14 * tile_size, screen_height - 24, arcade.csscolor.BLACK, 18)
 
-    def set_up(self, hero_hp, hero_max_hp, coins_collected, total_num_coins, levels_played):
+    def update(self, hero_hp, hero_max_hp, coins_collected, total_num_coins, levels_played):
         self.update_hp_display(hero_hp, hero_max_hp)
         self.update_score(coins_collected, total_num_coins)
         self.update_levels_played(levels_played)

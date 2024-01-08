@@ -15,24 +15,15 @@ SCREEN_HEIGHT = 20 * TILE_SIZE
 
 
 class Renderer:
-    def __init__(self):
+    def __init__(self, tile_num_x, tile_num_y, hero_x, hero_y):
         # scene is an object containing all sprites that are currently rendered
-        self.scene = None
-
-        # player camera
-        self.camera = None
-
-        self.tile_num_x = None
-        self.tile_num_y = None
-
-        # player and coin sprite seperated, so they can be changed dynamically
-        self.player_sprite = None
-        self.enemy_sprites = None
-
-    def set_up(self, tile_num_x, tile_num_y, hero_x, hero_y):
         self.scene = arcade.Scene()
 
+        # camera following the player
         self.camera = arcade.Camera()
+
+        # cheat code to see everything
+        # self.SEE_EVERYTHING = SEE_EVERYTHING
 
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
@@ -50,15 +41,10 @@ class Renderer:
         # sets up the player, rendering at specific location
         player_texture = "Tiles/tile_0098.png"
         self.player_sprite = arcade.Sprite(player_texture, TILE_SCALING)
+
         self.player_sprite.center_x = hero_x * TILE_SIZE + TILE_SIZE // 2
         self.player_sprite.center_y = hero_y * TILE_SIZE + TILE_SIZE // 2
         self.scene.add_sprite("Player", self.player_sprite)
-
-    def draw_scene(self):
-        # draws what is in view of the camera
-        self.camera.use()
-
-        self.scene.draw()
 
     # creates a new sprite
     def create_sprite(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):
@@ -142,3 +128,17 @@ class Renderer:
             player_centered = screen_center_x, screen_center_y
 
             self.camera.move_to(player_centered)
+
+    def update(self, hero_pos):
+        self.center_camera_to_player()
+
+        self.update_player_sprite(*hero_pos)
+        self.update_item_sprites(hero_pos)
+        self.update_coin_sprites(hero_pos)
+        self.update_food_sprites(hero_pos)
+
+    def draw_scene(self):
+        # draws what is in view of the camera
+        self.camera.use()
+
+        self.scene.draw()

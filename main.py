@@ -6,11 +6,6 @@ from read_write import write_down_stats
 from renderer import Renderer
 from ui import UI
 
-CHARACTER_SCALING = 1.8
-TILE_SCALING = 2.0
-COIN_SCALING = 1.4
-ITEM_SCALING = 1.6
-FOOD_SCALING = 1.5
 TILE_SIZE = 32
 
 # height should be width +1, to accommodate the ui
@@ -36,33 +31,22 @@ class Game(arcade.Window):
 
         self.hero = Hero()
 
-        self.renderer = Renderer()
         self.ui = UI(SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE, self.start_time)
 
+        self.renderer = None
         self.level = None
 
         self.tick = 0
-        self.player_is_dead = False
+        self.levels_played = 0
 
-        # only odd numbers
-        self.tile_num_x = 15
-        self.tile_num_y = 15
-
-        self.num_enemies = 0
-        self.enemies_lst = []
-
-        self.num_coins = self.calculate_num_open_tiles() // 5
-        self.total_num_coins = self.num_coins
+        self.total_num_coins = 0
         self.num_coins_collected = 0
 
-        self.num_food = 2
+        self.enemies_lst = []
 
         # used for interaction between level and main class
         self.player_change_x = 0
         self.player_change_y = 0
-
-        # keeps track of number of levels played
-        self.levels_played = 1
 
         if SOUND_ON:
             # TODO .wav or .ogg?
@@ -74,18 +58,33 @@ class Game(arcade.Window):
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
-    def setup(self):
-        self.level = Level(self.hero, self.tile_num_x, self.tile_num_y, self.num_coins, self.num_food, self.num_enemies, self.enemies_lst)
+    def set_up_new_instance(self):
+        self.levels_played += 1
 
-        self.renderer.set_up(self.tile_num_x, self.tile_num_y, *self.hero.get_position())
+        # first value is start size, second increment. total has to be odd
+        tile_num_x = 15 + self.levels_played * 2
+        tile_num_y = 15 + self.levels_played * 2
 
-        self.ui.set_up(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
+        # TODO this calculation could be out into level
+        # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
+        num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
+
+        # TODO adjust distributions
+        num_coins = num_open_tiles // 5
+        num_food = num_open_tiles // 6
+        num_enemies = 0
+
+        self.total_num_coins += num_coins
+
+        self.level = Level(self.hero, tile_num_x, tile_num_y, num_coins, num_food, num_enemies, self.enemies_lst)
+        self.renderer = Renderer(tile_num_x, tile_num_y, *self.hero.get_position())
+        self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
         # initial rendering of tiles in view, see everything, every tile, duh
         if I_SEE_EVERYTHING:
             every_tile = []
-            for x in range(self.tile_num_x):
-                for y in range(self.tile_num_y):
+            for x in range(tile_num_x):
+                for y in range(tile_num_y):
                     every_tile.append((x, y))
             self.renderer.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
         else:
@@ -128,42 +127,18 @@ class Game(arcade.Window):
         elif key == arcade.key.DOWN or key == arcade.key.S:
             self.player_change_y = 0
 
-    # TODO where should this method go?
-    # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
-    def calculate_num_open_tiles(self):
-        return 2 * ((self.tile_num_x - 2) // 2 + 1) * ((self.tile_num_y - 2) // 2 + 1)
-
-    # if player walks on stair, generates new level
-    def advance_to_next_level(self):
-        self.levels_played += 1
-        self.ui.update_levels_played(self.levels_played)
-
-        # only even numbers, so the end result will be odd
-        self.tile_num_x += 2
-        self.tile_num_y += 2
-
-        num_open_tiles = self.calculate_num_open_tiles()
-
-        # TODO adjust coin and food distribution
-        self.num_coins = num_open_tiles // 5
-        self.total_num_coins += self.num_coins
-        self.num_food = num_open_tiles // 6
-
-        print("Oh boy, here we go again")
-        self.setup()
-
     def stop_game(self):
-        # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.num_coins_collected, self.total_num_coins)
-        if SOUND_ON:
-            arcade.play_sound(self.game_over_sound, volume=0.5)
-
+        # draws death screen
         self.clear()
         arcade.draw_xywh_rectangle_filled(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, (00, 00, 00, 1))
-
         arcade.Text("YOU DIED", SCREEN_HEIGHT // 4, SCREEN_WIDTH // 2, arcade.csscolor.RED, 50).draw()
         arcade.finish_render()
 
+        if SOUND_ON:
+            arcade.play_sound(self.game_over_sound, volume=0.5)
+
         time.sleep(4)
+        # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.num_coins_collected, self.total_num_coins)
         self.close()
 
     def on_draw(self):
@@ -180,42 +155,30 @@ class Game(arcade.Window):
             # self.level.move_enemies()
             self.renderer.update_enemy_sprites(self.enemies_lst)
 
-        # updates player position, if moved
-        if self.player_change_x != 0 or self.player_change_y != 0:
-            self.level.move_player(self.player_change_x, self.player_change_y)
-            self.renderer.update_player_sprite(*self.hero.get_position())
+        self.level.move_player(self.player_change_x, self.player_change_y)
+        self.level.gameplay(I_AM_INVINCIBLE, self.levels_played)
 
-            self.level.gameplay(I_AM_INVINCIBLE, self.levels_played)
-            if self.level.check_completed():
-                self.advance_to_next_level()
+        if self.level.check_coin_collected():
+            self.num_coins_collected += 1
+            if SOUND_ON:
+                arcade.play_sound(self.coin_sound, volume=0.5)
 
-            self.renderer.center_camera_to_player()
-
-            # adds new tiles to scene
-            if not I_SEE_EVERYTHING:
-                new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
-                self.renderer.add_new_tiles_to_scene(new_tiles)
-
-            if self.level.check_item_collected():
-                self.renderer.update_item_sprites(self.hero.get_position())
-
-            if self.level.check_food_collected():
-                self.renderer.update_food_sprites(self.hero.get_position())
-
-            if self.level.check_coin_collected():
-                self.num_coins_collected += 1
-                self.renderer.update_coin_sprites(self.hero.get_position())
-                self.ui.update_score(self.num_coins_collected, self.total_num_coins)
-                if SOUND_ON:
-                    arcade.play_sound(self.coin_sound, volume=0.5)
-
-        self.ui.update_hp_display(self.hero.get_hp(), self.hero.get_max_hp())
-        self.ui.update_display_time()
         self.level.reset_collected_status()
+
+        # adds new tiles to scene
+        if not I_SEE_EVERYTHING:
+            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+            self.renderer.add_new_tiles_to_scene(new_tiles)
+
+        self.renderer.update(self.hero.get_position())
+        self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
         self.tick += 1
 
-        if self.player_is_dead:
+        if self.level.check_completed():
+            self.set_up_new_instance()
+
+        if self.hero.is_dead():
             self.stop_game()
 
 
@@ -223,7 +186,7 @@ def main():
     start_time = time.time()
     game = Game()
     print(f"boot up time 1: {round(time.time() - start_time, 2)}")
-    game.setup()
+    game.set_up_new_instance()
     print(f"boot up time 2: {round(time.time() - start_time, 2)}")
     # game.level.maze.print_out()
 
