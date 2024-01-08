@@ -34,6 +34,7 @@ class Level:
         self.new_item_collected = False
         self.generate_items()
 
+        # TODO unnecasary now
         self.new_food_collected = False
         self.generate_food()
 
@@ -73,10 +74,13 @@ class Level:
 
     def move_player(self, dx, dy):
         cx, cy = self.hero.get_position()
+        # first checks for both vertical and horizontal input
         if self.maze.check_obstacle(cx + dx, cy + dy):
             self.check_special_collision(cx + dx, cy + dy)
             self.maze.move_tile(cx, cy, cx + dx, cy + dy)
             self.hero.set_position(cx + dx, cy + dy)
+
+        # if not possible, check horizontal, then vertical
         elif self.maze.check_obstacle(cx + dx, cy):
             self.check_special_collision(cx + dx, cy)
             self.maze.move_tile(cx, cy, cx + dx, cy)

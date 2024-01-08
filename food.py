@@ -1,5 +1,6 @@
 from item import Item
 
+
 class Food(Item):
     def __init__(self, hp_restore):
         self.hp_restore = hp_restore
