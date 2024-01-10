@@ -1,6 +1,6 @@
 from character import Character
 
-BASE_HP_LOSS = 0.01
+BASE_HP_LOSS = 0.005
 
 
 class Hero(Character):
@@ -12,9 +12,10 @@ class Hero(Character):
 
     def is_dead(self):
         return self.hp <= 0
+
     # TODO should the hero or the level change his hp? if level or items, do damage function
 
-    # TODO this means the hero only loses hp if he is moving. Okay?
     def hp_decay(self, invincibility, levels_played):
+        # Base + scaling
         if not invincibility:
-            self.hp -= BASE_HP_LOSS * levels_played
+            self.hp -= BASE_HP_LOSS + BASE_HP_LOSS * levels_played * 0.5

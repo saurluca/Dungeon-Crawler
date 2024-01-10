@@ -13,7 +13,7 @@ SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = False
+I_SEE_EVERYTHING = True
 # no damage
 I_AM_INVINCIBLE = False
 # enables or disables diagonal movement
@@ -53,7 +53,7 @@ class Game(arcade.Window):
 
         # preloads the sound files to decrease loading time later
         if SOUND_ON:
-            # TODO .wav or .ogg?
+            # TODO choose one file format
             self.coin_sound = arcade.load_sound("Sounds/coin_sound.wav")
             self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
             self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
@@ -73,9 +73,9 @@ class Game(arcade.Window):
         # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
         num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
 
-        # TODO adjust distributions
-        num_coins = num_open_tiles // 5
-        num_food = num_open_tiles // 6
+        # TODO adjust distributions, could put in ratio to hp loss
+        num_coins = num_open_tiles // 8
+        num_food = num_open_tiles // 25
         num_enemies = 0
 
         self.total_num_coins += num_coins

@@ -34,6 +34,7 @@ class Level:
         self.new_coin_collected = False
 
         self.generate_food()
+        # self.generate_food_dead_end()
         self.new_food_collected = False
 
         self.generate_items()
@@ -53,10 +54,14 @@ class Level:
         x, y = self.maze.generate_stair_pos2()
         self.maze.set_tile(x, y, "S")
 
-    # TODO Item generation for different Items
     def generate_food(self):
         for i in range(self.num_food):
             x, y = self.maze.get_free_tile()
+            self.maze.set_tile(x, y, "F")
+
+    def generate_food_dead_end(self):
+        for i in range(5):
+            x, y = self.maze.get_dead_end()
             self.maze.set_tile(x, y, "F")
 
     def generate_items(self):
@@ -122,7 +127,8 @@ class Level:
                 item.collected(self.hero)
 
     def update_food(self):
-        food = Food(1)
+        # TODO do we need an extra class for this?
+        food = Food(5)
         food.collected(self.hero)
 
     def reset_collected_status(self):
