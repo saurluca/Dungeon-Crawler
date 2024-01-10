@@ -34,6 +34,10 @@ class Maze(MazeGenerator):
         self.grid[new_x][new_y] = self.grid[x][y]
         self.grid[x][y] = "."
 
+    def move_object_by(self, x, y, x_direction, y_direction):
+        self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
+        self.grid[x][y] = "."
+
     # currently only checking for walls
     def check_obstacle(self, x, y):
         return not (self.grid[x][y] == "#" or str(self.grid[x][y]) == "E")
@@ -113,9 +117,7 @@ class Maze(MazeGenerator):
                 # return dead_ends[i]
                 return dead_ends[i]
 
-    def move_object_by(self, x, y, x_direction, y_direction):
-        self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
-        self.grid[x][y] = "."
+
 
 
 def test1():

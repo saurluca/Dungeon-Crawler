@@ -10,10 +10,11 @@ BASE_HP_LOSS = 0.01
 
 
 class Level:
-    def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_food, num_enemies, enemies_lst):
+    def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_coins_collected, num_food, num_enemies, enemies_lst):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
         self.num_coins = num_coins
+        self.num_coins_collected = num_coins_collected
         self.num_enemies = num_enemies
         self.num_food = num_food
         self.item_list = []
@@ -28,6 +29,7 @@ class Level:
 
         self.fov = FieldOfView(self.maze)
 
+        # TODO possible to simplify further? play sound in level?
         self.new_coin_collected = False
         self.generate_coins()
 
@@ -95,34 +97,21 @@ class Level:
 
     # add item and other special thing collision here
     def check_special_collision(self, x, y):
+        # if collided, do action
         tile = self.maze(x, y)
-        if tile != ".":
+        # does not check walls and empty tiles
+        if tile != "." and tile != "#":
             if tile == "c":
+                self.num_coins_collected[0] += 1
                 self.new_coin_collected = True
             elif tile == "F":
                 self.update_food()
             elif tile == "I":
                 self.update_items(self.hero.x, self.hero.y)
+            elif tile == "S":
+                self.completed = True
+            # remove thing, set maze to empty tile
             self.maze.set_tile(x, y, ".")
-        if tile == "S":
-            self.completed = True
-
-    def check_completed(self):
-        return self.completed
-
-    def check_coin_collected(self):
-        return self.new_coin_collected
-
-    # calculates the fov and then returns a list of tiles that have not been seen before
-    def get_newly_visible_tiles(self):
-        return self.fov.calculate_fov(*self.hero.get_position())
-
-    # TODO, two liner, with in "string"
-    # adds to the list of new tiles, the type, so the checking and access to maze is handled in level
-    def add_tile_type(self, new_tiles):
-        for i in range(len(new_tiles)):
-            new_tiles[i] = (new_tiles[i], self.maze(*new_tiles[i]))
-        return new_tiles
 
     def update_items(self, x, y):
         for item in self.item_list:
@@ -136,3 +125,21 @@ class Level:
     def reset_collected_status(self):
         self.new_coin_collected = False
 
+    def check_completed(self):
+        return self.completed
+
+    def check_coin_collected(self):
+        collected = self.new_coin_collected
+        self.new_coin_collected = False
+        return collected
+
+    # calculates the fov and then returns a list of tiles that have not been seen before
+    def get_newly_visible_tiles(self):
+        return self.fov.calculate_fov(*self.hero.get_position())
+
+    # TODO, two liner, with in "string"
+    # adds to the list of new tiles, the type, so the checking and access to maze is handled in level
+    def add_tile_type(self, new_tiles):
+        for i in range(len(new_tiles)):
+            new_tiles[i] = (new_tiles[i], self.maze(*new_tiles[i]))
+        return new_tiles

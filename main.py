@@ -44,7 +44,7 @@ class Game(arcade.Window):
         self.levels_played = 0
 
         self.total_num_coins = 0
-        self.num_coins_collected = 0
+        self.num_coins_collected = [0]
 
         self.enemies_lst = []
 
@@ -80,7 +80,7 @@ class Game(arcade.Window):
 
         self.total_num_coins += num_coins
 
-        self.level = Level(self.hero, tile_num_x, tile_num_y, num_coins, num_food, num_enemies, self.enemies_lst)
+        self.level = Level(self.hero, tile_num_x, tile_num_y, num_coins, self.num_coins_collected, num_food, num_enemies, self.enemies_lst)
         self.renderer = Renderer(tile_num_x, tile_num_y, *self.hero.get_position())
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
@@ -142,7 +142,7 @@ class Game(arcade.Window):
             arcade.play_sound(self.game_over_sound, volume=0.5)
 
         time.sleep(4)
-        # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.num_coins_collected, self.total_num_coins)
+        # write_down_stats(self.levels_played, round(time.time() - self.start_time, 1), self.num_coins_collected[0], self.total_num_coins)
         self.close()
 
     def on_draw(self):
@@ -162,12 +162,8 @@ class Game(arcade.Window):
         self.level.move_player(self.player_change_x, self.player_change_y)
         self.hero.hp_decay(I_AM_INVINCIBLE, self.levels_played)
 
-        if self.level.check_coin_collected():
-            self.num_coins_collected += 1
-            if SOUND_ON:
-                arcade.play_sound(self.coin_sound, volume=0.5)
-
-        self.level.reset_collected_status()
+        if self.level.check_coin_collected() and SOUND_ON:
+            arcade.play_sound(self.coin_sound, volume=0.5)
 
         # adds new tiles to scene
         if not I_SEE_EVERYTHING:

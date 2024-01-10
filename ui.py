@@ -18,7 +18,7 @@ class UI:
 
     def update(self, hero_hp, hero_max_hp, coins_collected, total_num_coins, levels_played):
         self.update_hp_display(hero_hp, hero_max_hp)
-        self.update_score(coins_collected, total_num_coins)
+        self.update_score(coins_collected[0], total_num_coins)
         self.update_levels_played(levels_played)
         self.update_display_time()
 
