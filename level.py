@@ -65,8 +65,9 @@ class Level:
             self.maze.set_tile(x, y, "F")
 
     def generate_items(self):
-        x, y = self.maze.get_free_tile()
-        self.maze.set_tile(x, y, "I")
+        for i in range(num_item)
+        pos = self.maze.get_free_tile()
+        self.maze.set_tile(*pos, )
         self.item_list.append(Weapon(x, y, 10))
 
     # TODO should enemies be saved in maze?
