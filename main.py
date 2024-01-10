@@ -25,10 +25,9 @@ SOUND_ON = True
 class Game(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler", center_window=True)
-        # fullscreen = True
-        # What this do?
-        width, height = self.get_size()
-        self.set_viewport(0, width, 0, height)
+        # # fullscreen = True
+        # width, height = self.get_size()
+        # self.set_viewport(0, width, 0, height)
 
         # keeps track of time spent in a level
         self.start_time = time.time()
@@ -52,13 +51,14 @@ class Game(arcade.Window):
         self.hero_change_x = 0
         self.hero_change_y = 0
 
+        # preloads the sound files to decrease loading time later
         if SOUND_ON:
             # TODO .wav or .ogg?
             self.coin_sound = arcade.load_sound("Sounds/coin_sound.wav")
             self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
             self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
             self.game_over_sound = arcade.load_sound("Sounds/dark-souls-you-died.wav")
-            # self.food_sound = arcade.load_sound("")
+            self.food_sound = arcade.load_sound("Sounds/nom-nom-nom_s.mp3")
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
@@ -69,7 +69,7 @@ class Game(arcade.Window):
         tile_num_x = 15 + self.levels_played * 2
         tile_num_y = 15 + self.levels_played * 2
 
-        # TODO this calculation could be out into level
+        # TODO this calculation could be into level?
         # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
         num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
 
@@ -172,13 +172,16 @@ class Game(arcade.Window):
         self.renderer.update(self.hero.get_position())
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
-        # TODO, put all sounds to be played dynamically here
+        # TODO, put all sounds to be played dynamically here, or put into level
         # plays coin sound, if coin collected
-        if SOUND_ON and self.level.check_coin_collected():
-            arcade.play_sound(self.coin_sound, volume=0.5)
+        if SOUND_ON:
+            if self.level.check_coin_collected():
+                arcade.play_sound(self.coin_sound, volume=0.5)
+            if self.level.check_food_collected():
+                arcade.play_sound(self.food_sound, volume=0.5)
 
         self.tick += 1
-        
+
         # if level completed, go to next level/ make new instance of everything
         if self.level.check_completed():
             self.set_up_new_instance()

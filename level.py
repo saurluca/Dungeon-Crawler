@@ -29,12 +29,14 @@ class Level:
 
         self.fov = FieldOfView(self.maze)
 
-        # TODO possible to simplify further? play sound in level?
-        self.new_coin_collected = False
+        # TODO possible to simplify further, play sound in level?
         self.generate_coins()
+        self.new_coin_collected = False
+
+        self.generate_food()
+        self.new_food_collected = False
 
         self.generate_items()
-        self.generate_food()
 
         self.generate_stair()
         self.generate_enemies()
@@ -106,6 +108,7 @@ class Level:
                 self.new_coin_collected = True
             elif tile == "F":
                 self.update_food()
+                self.new_food_collected = True
             elif tile == "I":
                 self.update_items(self.hero.x, self.hero.y)
             elif tile == "S":
@@ -131,6 +134,11 @@ class Level:
     def check_coin_collected(self):
         collected = self.new_coin_collected
         self.new_coin_collected = False
+        return collected
+
+    def check_food_collected(self):
+        collected = self.new_food_collected
+        self.new_food_collected = False
         return collected
 
     # calculates the fov and then returns a list of tiles that have not been seen before
