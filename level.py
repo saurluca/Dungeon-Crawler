@@ -31,11 +31,7 @@ class Level:
         self.new_coin_collected = False
         self.generate_coins()
 
-        self.new_item_collected = False
         self.generate_items()
-
-        # TODO unnecasary now
-        self.new_food_collected = False
         self.generate_food()
 
         self.generate_stair()
@@ -104,9 +100,9 @@ class Level:
             if tile == "c":
                 self.new_coin_collected = True
             elif tile == "F":
-                self.new_food_collected = True
+                self.update_food()
             elif tile == "I":
-                self.new_item_collected = True
+                self.update_items(self.hero.x, self.hero.y)
             self.maze.set_tile(x, y, ".")
         if tile == "S":
             self.completed = True
@@ -116,12 +112,6 @@ class Level:
 
     def check_coin_collected(self):
         return self.new_coin_collected
-
-    def check_item_collected(self):
-        return self.new_item_collected
-
-    def check_food_collected(self):
-        return self.new_food_collected
 
     # calculates the fov and then returns a list of tiles that have not been seen before
     def get_newly_visible_tiles(self):
@@ -134,9 +124,6 @@ class Level:
             new_tiles[i] = (new_tiles[i], self.maze(*new_tiles[i]))
         return new_tiles
 
-    def base_hp_loss(self, factor=1):
-        self.hero.hp -= BASE_HP_LOSS * factor
-
     def update_items(self, x, y):
         for item in self.item_list:
             if item.x_pos == x and item.y_pos == y:
@@ -148,14 +135,4 @@ class Level:
 
     def reset_collected_status(self):
         self.new_coin_collected = False
-        self.new_item_collected = False
-        self.new_food_collected = False
 
-    # TODO this means the hero only loses hp if he is moving. Okay?
-    def gameplay(self, invincibility, levels_played):
-        if self.new_item_collected:
-            self.update_items(self.hero.x, self.hero.y)
-        if self.new_food_collected:
-            self.update_food()
-        if not invincibility:
-            self.hero.hp -= BASE_HP_LOSS * levels_played

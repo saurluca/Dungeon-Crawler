@@ -24,7 +24,11 @@ SOUND_ON = True
 
 class Game(arcade.Window):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler")
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler", center_window=True)
+        # fullscreen = True
+        # What this do?
+        width, height = self.get_size()
+        self.set_viewport(0, width, 0, height)
 
         # keeps track of time spent in a level
         self.start_time = time.time()
@@ -156,7 +160,7 @@ class Game(arcade.Window):
             self.renderer.update_enemy_sprites(self.enemies_lst)
 
         self.level.move_player(self.player_change_x, self.player_change_y)
-        self.level.gameplay(I_AM_INVINCIBLE, self.levels_played)
+        self.hero.hp_decay(I_AM_INVINCIBLE, self.levels_played)
 
         if self.level.check_coin_collected():
             self.num_coins_collected += 1
@@ -183,11 +187,11 @@ class Game(arcade.Window):
 
 
 def main():
-    start_time = time.time()
+    # start_time = time.time()
     game = Game()
-    print(f"boot up time 1: {round(time.time() - start_time, 2)}")
+    # print(f"boot up time 1: {round(time.time() - start_time, 2)}")
     game.set_up_new_instance()
-    print(f"boot up time 2: {round(time.time() - start_time, 2)}")
+    # print(f"boot up time 2: {round(time.time() - start_time, 2)}")
     # game.level.maze.print_out()
 
     arcade.schedule(game.update_things, 1 / 8)
