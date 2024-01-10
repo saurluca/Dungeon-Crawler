@@ -49,8 +49,8 @@ class Game(arcade.Window):
         self.enemies_lst = []
 
         # used for interaction between level and main class
-        self.player_change_x = 0
-        self.player_change_y = 0
+        self.hero_change_x = 0
+        self.hero_change_y = 0
 
         if SOUND_ON:
             # TODO .wav or .ogg?
@@ -101,21 +101,21 @@ class Game(arcade.Window):
     # if a key is pressed, changes movement speed in the pressed direction
     def on_key_press(self, key, modifiers):
         if key == arcade.key.RIGHT or key == arcade.key.D:
-            self.player_change_x = 1
+            self.hero_change_x = 1
             if not DIAGONAL_MOVEMENT:
-                self.player_change_y = 0
+                self.hero_change_y = 0
         elif key == arcade.key.LEFT or key == arcade.key.A:
-            self.player_change_x = -1
+            self.hero_change_x = -1
             if not DIAGONAL_MOVEMENT:
-                self.player_change_y = 0
+                self.hero_change_y = 0
         elif key == arcade.key.UP or key == arcade.key.W:
-            self.player_change_y = 1
+            self.hero_change_y = 1
             if not DIAGONAL_MOVEMENT:
-                self.player_change_x = 0
+                self.hero_change_x = 0
         elif key == arcade.key.DOWN or key == arcade.key.S:
-            self.player_change_y = -1
+            self.hero_change_y = -1
             if not DIAGONAL_MOVEMENT:
-                self.player_change_x = 0
+                self.hero_change_x = 0
         # finish game when pressing escape, save current stats
         elif key == arcade.key.ESCAPE:
             self.stop_game()
@@ -123,13 +123,13 @@ class Game(arcade.Window):
     # if key is released, resets movement speed in that direction
     def on_key_release(self, key, modifiers):
         if key == arcade.key.RIGHT or key == arcade.key.D:
-            self.player_change_x = 0
+            self.hero_change_x = 0
         elif key == arcade.key.LEFT or key == arcade.key.A:
-            self.player_change_x = 0
+            self.hero_change_x = 0
         elif key == arcade.key.UP or key == arcade.key.W:
-            self.player_change_y = 0
+            self.hero_change_y = 0
         elif key == arcade.key.DOWN or key == arcade.key.S:
-            self.player_change_y = 0
+            self.hero_change_y = 0
 
     def stop_game(self):
         # draws death screen
@@ -146,7 +146,6 @@ class Game(arcade.Window):
         self.close()
 
     def on_draw(self):
-        # clears the screen
         self.clear()
 
         self.renderer.draw_scene()
@@ -155,29 +154,36 @@ class Game(arcade.Window):
 
     # noinspection PyUnusedLocal
     def update_things(self, delta_time):
+        # updates the hero
+        self.level.move_hero(self.hero_change_x, self.hero_change_y)
+        self.hero.hp_decay(I_AM_INVINCIBLE, self.levels_played)
+
+        # updates enemies
         if self.tick % 2 == 0:
             # self.level.move_enemies()
             self.renderer.update_enemy_sprites(self.enemies_lst)
 
-        self.level.move_player(self.player_change_x, self.player_change_y)
-        self.hero.hp_decay(I_AM_INVINCIBLE, self.levels_played)
-
-        if self.level.check_coin_collected() and SOUND_ON:
-            arcade.play_sound(self.coin_sound, volume=0.5)
-
-        # adds new tiles to scene
+        # add newly uncovered tiles to scene, if fog of war on
         if not I_SEE_EVERYTHING:
             new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
             self.renderer.add_new_tiles_to_scene(new_tiles)
 
+        # updates the renderer and the ui
         self.renderer.update(self.hero.get_position())
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
-        self.tick += 1
+        # TODO, put all sounds to be played dynamically here
+        # plays coin sound, if coin collected
+        if SOUND_ON and self.level.check_coin_collected():
+            arcade.play_sound(self.coin_sound, volume=0.5)
 
+        self.tick += 1
+        
+        # if level completed, go to next level/ make new instance of everything
         if self.level.check_completed():
             self.set_up_new_instance()
 
+        # if hero died, finish game
         if self.hero.is_dead():
             self.stop_game()
 
@@ -190,6 +196,7 @@ def main():
     # print(f"boot up time 2: {round(time.time() - start_time, 2)}")
     # game.level.maze.print_out()
 
+    # gets called every 1/8 of a second
     arcade.schedule(game.update_things, 1 / 8)
 
     arcade.run()

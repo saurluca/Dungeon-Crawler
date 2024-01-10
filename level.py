@@ -70,7 +70,7 @@ class Level:
             self.maze.set_tile(*pos, enemy)
             self.enemies_lst.append(enemy)
 
-    def move_player(self, dx, dy):
+    def move_hero(self, dx, dy):
         cx, cy = self.hero.get_position()
         # first checks for both vertical and horizontal input
         if self.maze.check_obstacle(cx + dx, cy + dy):
