@@ -47,9 +47,39 @@ class Level:
 
         self.completed = False
 
+<<<<<<< Updated upstream
     # TODO decision: keep it here or do item managing/generation class?
     # TODO decision: generate special items like food only in dead ends? (makes things easier with enemy collision)
     # TODO decision: should enemies be saved in maze?
+=======
+    # TODO keep it here or do item managing/generation class?
+    def generate_coins(self):
+        for i in range(self.num_coins):
+            x, y = self.maze.get_free_tile()
+            self.maze.set_tile(x, y, "c")
+
+    def generate_stair(self):
+        x, y = self.maze.generate_stair_pos2()
+        self.maze.set_tile(x, y, "S")
+
+    def generate_food(self):
+        for i in range(self.num_food):
+            x, y = self.maze.get_free_tile()
+            self.maze.set_tile(x, y, "F")
+
+    def generate_food_dead_end(self):
+        for i in range(5):
+            x, y = self.maze.get_dead_end()
+            self.maze.set_tile(x, y, "F")
+
+    def generate_items(self):
+        for i in range(num_item=6):
+            pos = self.maze.get_free_tile()
+            self.maze.set_tile(*pos, )
+            self.item_list.append(Weapon( *pos, 10))
+
+    # TODO should enemies be saved in maze?
+>>>>>>> Stashed changes
     def generate_enemies(self):
         for i in range(self.num_enemies):
             pos = self.maze.get_free_tile()
