@@ -28,7 +28,6 @@ class FieldOfView:
             mask.append(row)
         return mask
 
-    # TODO: could more efficient
     def calculate_fov(self, cx, cy):
         # hero position in the relative grid
         rx, ry = self.view_range, self.view_range

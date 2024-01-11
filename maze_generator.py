@@ -2,7 +2,7 @@ import time
 from random import choice, randint
 
 
-# TODO different type of maze, with connecting passages?
+
 def check_unvisited_neighbors(current_cell, visited, tile_num_x, tile_num_y):
     open_neighbors = []
     for dx, dy in ((2, 0), (-2, 0), (0, 2), (0, -2)):
@@ -46,7 +46,6 @@ def check_dead_end(x, y, grid):
 
 
 class MazeGenerator:
-    # TODO write maze solving algorithm, to get good spots for spawning shit
     # generates a grid using prims algorithm
     # "#" represents a wall, "." a free tile
     @staticmethod
@@ -127,7 +126,6 @@ class MazeGenerator:
         grid = generate_alternating_grid(tile_num_x, tile_num_y)
         weights = [True for _ in range(recursive_weight)] + [False for _ in range(random_weight)]
 
-        # TODO implement start at a random position ?
         visited = [(1, 1)]
 
         # -2 because of wall border, // 2 + 1 to half it and round up, of x and y tiles

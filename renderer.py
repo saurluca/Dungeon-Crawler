@@ -105,7 +105,6 @@ class Renderer:
             if hero_pos == (int(item.center_x / TILE_SIZE), int(item.center_y / TILE_SIZE)):
                 self.scene.get_sprite_list("Items").remove(item)
 
-    # TODO sound should not be here
     def update_coin_sprites(self, hero_pos):
         for coin in self.scene.get_sprite_list("Coins"):
             if hero_pos == (int(coin.center_x / TILE_SIZE), int(coin.center_y / TILE_SIZE)):

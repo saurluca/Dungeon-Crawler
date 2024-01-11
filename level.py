@@ -19,7 +19,7 @@ class Level:
         self.num_food = num_food
         self.item_list = []
 
-        self.num_item = 0
+        self.num_items = 0
 
         self.hero = hero
         self.maze = Maze(self.tile_num_x, self.tile_num_y, 3, 1)
@@ -35,13 +35,11 @@ class Level:
         # has to be generated first
         self.generate_enemies()
 
-        # TODO possible to simplify further, play sound in level?
+        # TODO decision: play sound in level?
         self.generate_coins()
         self.new_coin_collected = False
 
-        # TODO choose if food only in dead ends, else enemy integrate on_food
         self.generate_food()
-        # self.generate_food_dead_end()
         self.new_food_collected = False
 
         self.generate_items()
@@ -49,9 +47,9 @@ class Level:
 
         self.completed = False
 
-    # TODO keep it here or do item managing/generation class?
-
-    # TODO should enemies be saved in maze?
+    # TODO decision: keep it here or do item managing/generation class?
+    # TODO decision: generate special items like food only in dead ends? (makes things easier with enemy collision)
+    # TODO decision: should enemies be saved in maze?
     def generate_enemies(self):
         for i in range(self.num_enemies):
             pos = self.maze.get_free_tile()
@@ -61,28 +59,24 @@ class Level:
 
     def generate_coins(self):
         for i in range(self.num_coins):
-            x, y = self.maze.get_free_tile()
-            self.maze.set_tile(x, y, "c")
+            pos = self.maze.get_free_tile()
+            self.maze.set_tile(*pos, "c")
 
     def generate_stair(self):
-        x, y = self.maze.generate_stair_pos2()
-        self.maze.set_tile(x, y, "S")
+        pos = self.maze.generate_stair_pos2()
+        self.maze.set_tile(*pos, "S")
 
     def generate_food(self):
         for i in range(self.num_food):
-            x, y = self.maze.get_free_tile()
-            self.maze.set_tile(x, y, "F")
-
-    def generate_food_dead_end(self):
-        for i in range(5):
-            x, y = self.maze.get_dead_end()
-            self.maze.set_tile(x, y, "F")
+            pos = self.maze.get_free_tile()
+            self.maze.set_tile(*pos, "F")
 
     def generate_items(self):
-        for i in range(self.num_item):
+        for i in range(self.num_items):
             pos = self.maze.get_free_tile()
-            self.maze.set_tile(*pos, )
-            self.item_list.append(Weapon(*pos, 10))
+            item = Weapon(*pos, 10)
+            self.maze.set_tile(*pos, item)
+            self.item_list.append(item)
 
     def move_hero(self, dx, dy):
         cx, cy = self.hero.get_position()
@@ -144,7 +138,7 @@ class Level:
                 item.collected(self.hero)
 
     def update_food(self):
-        # TODO do we need an extra class for this?
+        # TODO decision: keep Food class?
         food = Food(5)
         food.collected(self.hero)
 
@@ -168,7 +162,6 @@ class Level:
     def get_newly_visible_tiles(self):
         return self.fov.calculate_fov(*self.hero.get_position())
 
-    # TODO, two liner, with in "string"
     # adds to the list of new tiles, the type, so the checking and access to maze is handled in level
     def add_tile_type(self, new_tiles):
         for i in range(len(new_tiles)):

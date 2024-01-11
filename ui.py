@@ -23,9 +23,7 @@ class UI:
         self.update_display_time()
 
     def update_hp_display(self, hero_hp, hero_max_hp):
-        # TODO else what?
-        if hero_hp > 0:
-            self.hp_text.text = f"HP: {hero_hp:.1f} / {hero_max_hp}"
+        self.hp_text.text = f"HP: {hero_hp:.1f} / {hero_max_hp}"
 
     def update_score(self, coins_collected, total_num_coins):
         self.score_text.text = f"Score: {coins_collected} / {total_num_coins}"

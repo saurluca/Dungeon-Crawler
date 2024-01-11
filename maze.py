@@ -52,7 +52,7 @@ class Maze(MazeGenerator):
 
     # tiles that are not walk through
     blockers = set("#HE")
-    # TODO what about items for enemies? put them into a corner, and then?
+    # TODO enemies should not collide with items etc, in order for them not to get erased
 
     def check_obstacle(self, x, y):
         return not self.blockers & set(str(self.grid[x][y]))

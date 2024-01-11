@@ -51,7 +51,7 @@ class Game(arcade.Window):
 
         # preloads the sound files to decrease loading time later
         if SOUND_ON:
-            # TODO choose one file format
+            # TODO decision: which file format?
             self.coin_sound = arcade.load_sound("Sounds/coin_sound.wav")
             self.start_sound = arcade.load_sound("Sounds/prepare_yourself.ogg")
             self.win_sound = arcade.load_sound("Sounds/you_win.ogg")
@@ -67,7 +67,7 @@ class Game(arcade.Window):
         tile_num_x = 15 + self.levels_played * 2
         tile_num_y = 15 + self.levels_played * 2
 
-        # TODO this calculation could be put into level?
+        # TODO decision: values/calculation for new level gen in level or in main?
         # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
         num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
 
@@ -172,7 +172,8 @@ class Game(arcade.Window):
         self.renderer.update(self.hero.get_position())
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
-        # TODO, put all sounds to be played dynamically here, or put into level
+        # TODO decision: put all sounds to be played dynamically here, or put into level
+        # TODO decision: make sound class or not?
         # plays coin sound, if coin collected
         if SOUND_ON:
             if self.level.check_coin_collected():

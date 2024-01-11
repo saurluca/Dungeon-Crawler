@@ -13,7 +13,7 @@ class Hero(Character):
     def is_dead(self):
         return self.hp <= 0
 
-    # TODO should the hero or the level change his hp? if level or items, do damage function
+    # TODO decision: should the hero or the level change hero hp? if level or items, do damage function for resistance etc
 
     def hp_decay(self, invincibility, levels_played):
         # Base + scaling
