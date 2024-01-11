@@ -165,8 +165,8 @@ class Game(arcade.Window):
         # updates enemies every 4th tick
         if self.tick % 4 == 0:
             self.level.move_enemies()
-            self.level.update_enemy_visibility()
             self.renderer.update_enemy_sprites(self.level.enemy_lst)
+        self.level.update_enemy_visibility()
 
         # updates the renderer and the ui
         self.renderer.update(self.hero.get_position())
