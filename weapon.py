@@ -2,13 +2,9 @@ from item import Item
 
 
 class Weapon(Item):
-
-    def __init__(self, x, y, damage):
-        self.x_pos = x
-        self.y_pos = y
+    def __init__(self, pos, damage):
+        super().__init__(pos)
         self.damage = damage
-
-    # set position by class Item
 
     def set_damage(self, damage):
         self.damage = damage

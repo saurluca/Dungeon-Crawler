@@ -15,7 +15,7 @@ SCREEN_HEIGHT = 20 * TILE_SIZE
 
 
 class Renderer:
-    def __init__(self, tile_num_x, tile_num_y, hero_x, hero_y, enemy_lst):
+    def __init__(self, tile_num_x, tile_num_y, hero_x, hero_y, enemy_lst, uncovered_tiles):
         # scene is an object containing all sprites that are currently rendered
         self.scene = arcade.Scene()
 
@@ -24,6 +24,8 @@ class Renderer:
 
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
+
+        self.uncovered_tiles = uncovered_tiles
 
         # sets up the scene, container for sprites
         self.scene.add_sprite_list("Floor", use_spatial_hash=True)
@@ -71,7 +73,7 @@ class Renderer:
             if object_type == "c":
                 coin_texture = "Tiles/tile_0003.png"
                 self.create_sprite(coin_texture, "Coins", *pos, COIN_SCALING)
-            if object_type == "F":
+            elif object_type == "F":
                 food_texture = "Tiles/tile_0066.png"
                 self.create_sprite(food_texture, "Food", *pos, FOOD_SCALING)
             elif object_type == "I":
@@ -92,8 +94,9 @@ class Renderer:
         i = 0
         for enemy_sprite in self.scene.get_sprite_list("Enemies"):
             enemy_sprite.visible = enemy_lst[i].visible
-            enemy_sprite.center_x = enemy_lst[i].get_x() * TILE_SIZE + TILE_SIZE // 2
-            enemy_sprite.center_y = enemy_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
+            x, y = enemy_lst[i].get_position()
+            enemy_sprite.center_x = x * TILE_SIZE + TILE_SIZE // 2
+            enemy_sprite.center_y = y * TILE_SIZE + TILE_SIZE // 2
             i += 1
 
     def update_item_sprites(self, hero_pos):

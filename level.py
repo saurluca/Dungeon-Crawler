@@ -1,12 +1,13 @@
 from random import choice
 from maze import Maze
 from field_of_view import FieldOfView
-from item import Item
 from weapon import Weapon
 from enemy import Enemy
-from food import Food
 
 BASE_HP_LOSS = 0.01
+
+
+# TODO rework pos and x and y
 
 
 class Level:
@@ -26,7 +27,7 @@ class Level:
 
         self.enemy_lst = []
 
-        self.hero.set_position(*self.maze.start_hero_pos)
+        self.hero.set_position(self.maze.start_hero_pos)
         self.maze.set_tile(*self.hero.get_position(), self.hero)
 
         self.uncovered_tiles = [[False for _ in range(self.tile_num_y)] for _ in range(self.tile_num_x)]
@@ -35,7 +36,6 @@ class Level:
         # has to be generated first
         self.generate_enemies()
 
-        # TODO decision: play sound in level?
         self.generate_coins()
         self.new_coin_collected = False
 
@@ -47,18 +47,10 @@ class Level:
 
         self.completed = False
 
-
-    # TODO decision: keep it here or do item managing/generation class?
-    # TODO decision: generate special items like food only in dead ends? (makes things easier with enemy collision)
-    # TODO decision: should enemies be saved in maze?
-
-    # TODO keep it here or do item managing/generation class?
-    # TODO should enemies be saved in maze?
-
     def generate_enemies(self):
         for i in range(self.num_enemies):
             pos = self.maze.get_free_tile()
-            enemy = Enemy(*pos)
+            enemy = Enemy(pos)
             self.maze.set_tile(*pos, enemy)
             self.enemy_lst.append(enemy)
 
@@ -78,8 +70,8 @@ class Level:
 
     def generate_items(self):
         for i in range(self.num_items):
-            pos = self.maze.get_free_tile()
-            item = Weapon(*pos, 10)
+            pos = self.maze.get_dead_end()
+            item = Weapon(pos, 10)
             self.maze.set_tile(*pos, item)
             self.item_list.append(item)
 
@@ -87,30 +79,30 @@ class Level:
         cx, cy = self.hero.get_position()
         # first checks for both vertical and horizontal input
         if self.maze.check_obstacle(cx + dx, cy + dy):
-            self.check_collision_for_hero(cx + dx, cy + dy)
+            self.check_collision_for_hero((cx + dx, cy + dy))
             self.maze.move_entity(cx, cy, cx + dx, cy + dy)
-            self.hero.set_position(cx + dx, cy + dy)
+            self.hero.set_position((cx + dx, cy + dy))
 
         # if not possible, check horizontal, then vertical
         elif self.maze.check_obstacle(cx + dx, cy):
-            self.check_collision_for_hero(cx + dx, cy)
+            self.check_collision_for_hero((cx + dx, cy))
             self.maze.move_entity(cx, cy, cx + dx, cy)
-            self.hero.set_x(cx + dx)
+            self.hero.set_position((cx + dx, cy))
         elif self.maze.check_obstacle(cx, cy + dy):
-            self.check_collision_for_hero(cx, cy + dy)
+            self.check_collision_for_hero((cx, cy + dy))
             self.maze.move_entity(cx, cy, cx, cy + dy)
-            self.hero.set_y(cy + dy)
+            self.hero.set_position((cx, cy + dy))
 
     def move_enemies(self):
         for enemy in self.enemy_lst:
-            x, y = enemy.get_position()
-            viable_tiles = self.maze.get_viable_tiles(x, y)
+            pos = enemy.get_position()
+            viable_tiles = self.maze.get_viable_tiles(*pos)
             # checks if the list of possible tiles is not empty, else does not move
             if viable_tiles:
-                new_x, new_y = choice(viable_tiles)
-                enemy.set_position(new_x, new_y)
-                enemy.standing_on = self.maze(new_x, new_y)
-                self.maze.move_entity(x, y, new_x, new_y)
+                new_pos = choice(viable_tiles)
+                enemy.set_position(new_pos)
+                enemy.standing_on = self.maze(*new_pos)
+                self.maze.move_entity(*pos, *new_pos)
 
     def update_enemy_visibility(self):
         # if enemy on an uncovered tile, set visibility to False, else True
@@ -119,36 +111,28 @@ class Level:
             enemy.visible = self.uncovered_tiles[x][y]
 
     # add item and other special thing collision here
-    def check_collision_for_hero(self, x, y):
+    def check_collision_for_hero(self, pos):
         # if collided, do action
-        tile = self.maze(x, y)
+        tile = self.maze(*pos)
         # does not check walls and empty tiles
         if tile != "." and tile != "#":
             if tile == "c":
                 self.num_coins_collected[0] += 1
                 self.new_coin_collected = True
             elif tile == "F":
-                self.update_food()
+                self.hero.heal(5)
                 self.new_food_collected = True
             elif tile == "I":
-                self.update_items(self.hero.x, self.hero.y)
+                self.update_items(self.hero.get_position())
             elif tile == "S":
                 self.completed = True
             # remove thing, set maze to empty tile
-            self.maze.set_tile(x, y, ".")
+            self.maze.set_tile(*pos, ".")
 
-    def update_items(self, x, y):
+    def update_items(self, pos):
         for item in self.item_list:
-            if item.x_pos == x and item.y_pos == y:
+            if item.pos == pos:
                 item.collected(self.hero)
-
-    def update_food(self):
-        # TODO decision: keep Food class?
-        food = Food(5)
-        food.collected(self.hero)
-
-    def reset_collected_status(self):
-        self.new_coin_collected = False
 
     def check_completed(self):
         return self.completed

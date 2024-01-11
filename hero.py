@@ -4,8 +4,8 @@ BASE_HP_LOSS = 0.005
 
 
 class Hero(Character):
-    def __init__(self, x=1, y=1, hp=20, damage=4):
-        super().__init__(x, y, hp, damage)
+    def __init__(self, pos=(1, 1), hp=20, damage=4):
+        super().__init__(pos, hp, damage)
 
     def __str__(self):
         return "H"
@@ -13,9 +13,10 @@ class Hero(Character):
     def is_dead(self):
         return self.hp <= 0
 
-    # TODO decision: should the hero or the level change hero hp? if level or items, do damage function for resistance etc
-
     def hp_decay(self, invincibility, levels_played):
         # Base + scaling
         if not invincibility:
             self.hp -= BASE_HP_LOSS + BASE_HP_LOSS * levels_played * 0.5
+
+    def heal(self, value):
+        self.hp = min(self.hp + value, self.max_hp)

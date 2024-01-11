@@ -24,7 +24,7 @@ SOUND_ON = True
 
 class Game(arcade.Window):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler", center_window=True, fullscreen = True)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler", center_window=True)
         # # fullscreen = True
         # width, height = self.get_size()
         # self.set_viewport(0, width, 0, height)
@@ -67,19 +67,19 @@ class Game(arcade.Window):
         tile_num_x = 15 + self.levels_played * 2
         tile_num_y = 15 + self.levels_played * 2
 
-        # TODO decision: values/calculation for new level gen in level or in main?
+        # TODO take value from open tiles maze
+        # TODO put into level
         # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
         num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
 
-        # TODO adjust distributions, could put in ratio to hp loss
         num_coins = num_open_tiles // 8
-        num_food = num_open_tiles // 25
-        num_enemies = 5
+        num_food = num_open_tiles // 24
+        num_enemies = num_open_tiles // 24
 
         self.total_num_coins += num_coins
 
         self.level = Level(self.hero, tile_num_x, tile_num_y, num_coins, self.num_coins_collected, num_food, num_enemies)
-        self.renderer = Renderer(tile_num_x, tile_num_y, *self.hero.get_position(), self.level.enemy_lst)
+        self.renderer = Renderer(tile_num_x, tile_num_y, *self.hero.get_position(), self.level.enemy_lst, self.level.uncovered_tiles)
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
         # initial rendering of tiles in view, see everything, every tile, duh
@@ -172,8 +172,6 @@ class Game(arcade.Window):
         self.renderer.update(self.hero.get_position())
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
-        # TODO decision: put all sounds to be played dynamically here, or put into level
-        # TODO decision: make sound class or not?
         # plays coin sound, if coin collected
         if SOUND_ON:
             if self.level.check_coin_collected():
@@ -184,7 +182,7 @@ class Game(arcade.Window):
         self.tick += 1
 
         # if level completed, go to next level/ make new instance of everything
-        if self.level.check_completed():
+        if self.level.completed:
             self.set_up_new_instance()
 
         # if hero died, finish game
