@@ -1,16 +1,16 @@
 import time
 from random import choice, randint
-from maze_generator import MazeGenerator
+from maze_generator import generate_growing_tree_maze, search_dead_ends
 
 
-class Maze(MazeGenerator):
+class Maze:
     def __init__(self, tile_num_x=15, tile_num_y=15, recursive_weight=4, random_weight=1):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
 
-        self.grid = super().generate_growing_tree_maze(tile_num_x, tile_num_y, recursive_weight, random_weight)
+        self.grid = generate_growing_tree_maze(tile_num_x, tile_num_y, recursive_weight, random_weight)
 
-        self.dead_ends = super().search_dead_ends(tile_num_x, tile_num_y, self.grid)
+        self.dead_ends = search_dead_ends(tile_num_x, tile_num_y, self.grid)
         self.unused_dead_ends = self.dead_ends
 
         self.free_tiles = []
@@ -58,7 +58,10 @@ class Maze(MazeGenerator):
         return not self.grid[x][y] == "#"
 
     def print_out(self):
-        super().print_out(self.grid)
+        for row in self.grid:
+            for tile in row:
+                print(tile, end="")
+            print("")
 
     def get_free_tile(self):
         free_tile = choice(self.free_tiles)

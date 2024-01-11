@@ -23,6 +23,6 @@ if __name__ == '__main__':
 # make possible to have to things on one tile in maze. coins not object, so maybe easily possible?
 # advantage: can keep the coins
 
-# put items into the dead ends, coins not objects, tf can save enemy easiyl with coin
+# put items into the dead ends, coins not objects, tf can save enemy easily with coin
 
 
