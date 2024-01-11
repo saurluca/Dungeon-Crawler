@@ -13,7 +13,7 @@ SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = True
+I_SEE_EVERYTHING = False
 # no damage
 I_AM_INVINCIBLE = False
 # enables or disables diagonal movement
@@ -45,8 +45,6 @@ class Game(arcade.Window):
         self.total_num_coins = 0
         self.num_coins_collected = [0]
 
-        self.enemies_lst = []
-
         # used for interaction between level and main class
         self.hero_change_x = 0
         self.hero_change_y = 0
@@ -69,19 +67,19 @@ class Game(arcade.Window):
         tile_num_x = 15 + self.levels_played * 2
         tile_num_y = 15 + self.levels_played * 2
 
-        # TODO this calculation could be into level?
+        # TODO this calculation could be put into level?
         # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
         num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
 
         # TODO adjust distributions, could put in ratio to hp loss
         num_coins = num_open_tiles // 8
         num_food = num_open_tiles // 25
-        num_enemies = 0
+        num_enemies = 5
 
         self.total_num_coins += num_coins
 
-        self.level = Level(self.hero, tile_num_x, tile_num_y, num_coins, self.num_coins_collected, num_food, num_enemies, self.enemies_lst)
-        self.renderer = Renderer(tile_num_x, tile_num_y, *self.hero.get_position())
+        self.level = Level(self.hero, tile_num_x, tile_num_y, num_coins, self.num_coins_collected, num_food, num_enemies)
+        self.renderer = Renderer(tile_num_x, tile_num_y, *self.hero.get_position(), self.level.enemy_lst)
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
         # initial rendering of tiles in view, see everything, every tile, duh
@@ -90,6 +88,7 @@ class Game(arcade.Window):
             for x in range(tile_num_x):
                 for y in range(tile_num_y):
                     every_tile.append((x, y))
+            self.level.uncovered_tiles = [[True for _ in range(tile_num_y)] for _ in range(tile_num_x)]
             self.renderer.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
         else:
             new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
@@ -158,15 +157,16 @@ class Game(arcade.Window):
         self.level.move_hero(self.hero_change_x, self.hero_change_y)
         self.hero.hp_decay(I_AM_INVINCIBLE, self.levels_played)
 
-        # updates enemies
-        if self.tick % 2 == 0:
-            # self.level.move_enemies()
-            self.renderer.update_enemy_sprites(self.enemies_lst)
-
-        # add newly uncovered tiles to scene, if fog of war on
+        # if fog of war on, add newly uncovered tiles to scene
         if not I_SEE_EVERYTHING:
             new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
             self.renderer.add_new_tiles_to_scene(new_tiles)
+
+        # updates enemies every 4th tick
+        if self.tick % 4 == 0:
+            self.level.move_enemies()
+            self.level.update_enemy_visibility()
+            self.renderer.update_enemy_sprites(self.level.enemy_lst)
 
         # updates the renderer and the ui
         self.renderer.update(self.hero.get_position())

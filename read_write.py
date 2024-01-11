@@ -12,3 +12,13 @@ def write_down_stats(level, time, score, total_score):
 
 if __name__ == '__main__':
     write_down_stats(2, 2, 2, 2)
+
+# remove coins all together and put items into dead ends?
+# easy to implement
+
+# make possible to have to things on one tile in maze. coins not object, so maybe easily possible?
+# advantage: can keep the coins
+
+# put items into the dead ends, coins not objects, tf can save enemy easiyl with coin
+
+# TODO why the hell geter and setter again?

@@ -7,13 +7,13 @@ VIEW_RANGE = 3
 
 
 class FieldOfView:
-    def __init__(self, maze):
+    def __init__(self, maze, uncovered_tiles):
         self.maze = maze
         self.view_range = VIEW_RANGE
-        self.tile_num_x, self.tile_num_y = maze.get_tile_num()
+        self.tile_num_x, self.tile_num_y = maze.tile_num_x, maze.tile_num_y
 
         self.view_range_mask = self.create_view_range_mask()
-        self.uncovered_tiles = [[False for _ in range(self.tile_num_y)] for _ in range(self.tile_num_x)]
+        self.uncovered_tiles = uncovered_tiles
         self.new_tiles = None
 
     def create_view_range_mask(self):
@@ -51,7 +51,7 @@ class FieldOfView:
     def check_block_visible(self, cx, cy, rx, ry, x, y):
         s = get_line((rx, ry), (x, y))
         for point in s:
-            if not self.maze.check_obstacle(cx + point[0] - rx, cy + point[1] - ry) and point != (x, y):
+            if not self.maze.check_see_through(cx + point[0] - rx, cy + point[1] - ry) and point != (x, y):
                 return False
         return True
 

@@ -30,23 +30,38 @@ class Maze(MazeGenerator):
     def set_tile(self, x, y, thing):
         self.grid[x][y] = thing
 
-    def move_tile(self, x, y, new_x, new_y):
+    # TODO fix, coins and food moved by one tile if stepped on
+    def move_entity(self, x, y, new_x, new_y):
         self.grid[new_x][new_y] = self.grid[x][y]
-        self.grid[x][y] = "."
+        # checks if the entity is standing on something
+        if len(str(self.grid[x][y])) > 1:
+            # print(str(self.grid[x][y]))
+            self.grid[x][y] = str(self.grid[x][y])[1]
+            # print(self.grid[x][y])
+        else:
+            self.grid[x][y] = "."
+        # self.grid[x][y] = str(self.grid[x][y])[1]
 
     def move_object_by(self, x, y, x_direction, y_direction):
         self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
         self.grid[x][y] = "."
 
-    # currently only checking for walls
+    # old version
+    # def check_obstacle2(self, x, y):
+    #     return not (self.grid[x][y] == "#" or str(self.grid[x][y]) == "E")
+
+    # tiles that are not walk through
+    blockers = set("#HE")
+    # TODO what about items for enemies? put them into a corner, and then?
+
     def check_obstacle(self, x, y):
-        return not (self.grid[x][y] == "#" or str(self.grid[x][y]) == "E")
+        return not self.blockers & set(str(self.grid[x][y]))
+
+    def check_see_through(self, x, y):
+        return not self.grid[x][y] == "#"
 
     def print_out(self):
         super().print_out(self.grid)
-
-    def get_tile_num(self):
-        return self.tile_num_x, self.tile_num_y
 
     def get_free_tile(self):
         free_tile = choice(self.free_tiles)
@@ -64,9 +79,6 @@ class Maze(MazeGenerator):
         dead_end = choice(self.unused_dead_ends)
         self.unused_dead_ends.remove(dead_end)
         return dead_end
-
-    def get_start_hero_pos(self):
-        return self.start_hero_pos
 
     # only an approximation of distance, not actual walk distance
     # TODO fuck you break
@@ -116,8 +128,6 @@ class Maze(MazeGenerator):
             if a <= list_distance[i]:
                 # return dead_ends[i]
                 return dead_ends[i]
-
-
 
 
 def test1():

@@ -15,7 +15,7 @@ SCREEN_HEIGHT = 20 * TILE_SIZE
 
 
 class Renderer:
-    def __init__(self, tile_num_x, tile_num_y, hero_x, hero_y):
+    def __init__(self, tile_num_x, tile_num_y, hero_x, hero_y, enemy_lst):
         # scene is an object containing all sprites that are currently rendered
         self.scene = arcade.Scene()
 
@@ -46,11 +46,14 @@ class Renderer:
         self.player_sprite.center_y = hero_y * TILE_SIZE + TILE_SIZE // 2
         self.scene.add_sprite("Player", self.player_sprite)
 
+        self.add_enemy_sprites(enemy_lst)
+
     # creates a new sprite
-    def create_sprite(self, texture, scene_name, x, y, t_scaling=TILE_SCALING):
+    def create_sprite(self, texture, scene_name, x, y, t_scaling=TILE_SCALING, visible=True):
         sprite = arcade.Sprite(texture, t_scaling)
         sprite.center_x = x * TILE_SIZE + TILE_SIZE // 2
         sprite.center_y = y * TILE_SIZE + TILE_SIZE // 2
+        sprite.visible = visible
         self.scene.add_sprite(scene_name, sprite)
 
     # adds the tiles not seen before to the scene
@@ -70,9 +73,6 @@ class Renderer:
             if object_type == "F":
                 food_texture = "Tiles/tile_0066.png"
                 self.create_sprite(food_texture, "Food", *pos, FOOD_SCALING)
-            elif object_type == "E":
-                enemy_texture = "Tiles/tile_0124.png"
-                self.create_sprite(enemy_texture, "Enemies", *pos, CHARACTER_SCALING)
             elif object_type == "I":
                 item_texture = "Tiles/tile_0118.png"
                 self.create_sprite(item_texture, "Items", *pos, ITEM_SCALING)
@@ -86,11 +86,18 @@ class Renderer:
         self.player_sprite.center_x = cx * TILE_SIZE + TILE_SIZE // 2
         self.player_sprite.center_y = cy * TILE_SIZE + TILE_SIZE // 2
 
-    def update_enemy_sprites(self, enemies_lst):
+    def add_enemy_sprites(self, enemy_lst):
+        for enemy in enemy_lst:
+            enemy_texture = "Tiles/tile_0124.png"
+            self.create_sprite(enemy_texture, "Enemies", *enemy.get_position(), CHARACTER_SCALING, visible=enemy.visible)
+
+    # not in uncovered tiles, therefore makes new sprite, error, to many things
+    def update_enemy_sprites(self, enemy_lst):
         i = 0
-        for enemy in self.scene.get_sprite_list("Enemies"):
-            enemy.center_x = enemies_lst[i].get_x() * TILE_SIZE + TILE_SIZE // 2
-            enemy.center_y = enemies_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
+        for enemy_sprite in self.scene.get_sprite_list("Enemies"):
+            enemy_sprite.visible = enemy_lst[i].visible
+            enemy_sprite.center_x = enemy_lst[i].get_x() * TILE_SIZE + TILE_SIZE // 2
+            enemy_sprite.center_y = enemy_lst[i].get_y() * TILE_SIZE + TILE_SIZE // 2
             i += 1
 
     def update_item_sprites(self, hero_pos):
