@@ -35,12 +35,9 @@ class Maze(MazeGenerator):
         self.grid[new_x][new_y] = self.grid[x][y]
         # checks if the entity is standing on something
         if len(str(self.grid[x][y])) > 1:
-            # print(str(self.grid[x][y]))
             self.grid[x][y] = str(self.grid[x][y])[1]
-            # print(self.grid[x][y])
         else:
             self.grid[x][y] = "."
-        # self.grid[x][y] = str(self.grid[x][y])[1]
 
     def move_object_by(self, x, y, x_direction, y_direction):
         self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
@@ -82,7 +79,7 @@ class Maze(MazeGenerator):
 
     # only an approximation of distance, not actual walk distance
     # TODO fuck you break
-    def generate_stair_pos2(self):
+    def generate_stair_pos3(self):
         long_len = 3
         distant_points = [(0, (0, 0)) for _ in range(long_len)]
         x1, y1 = self.start_hero_pos
@@ -102,12 +99,11 @@ class Maze(MazeGenerator):
             if a[0] != 0:
                 return a[1]
 
-    def generate_stair_pos3(self):
+    def generate_stair_pos2(self):
         """using the unused_dead_ends list this method returns an object of that list calculating the distances between the
         dead_end and the Hero position increasing the chance of more distant dead_ends being chosen
         """
         dead_ends = self.unused_dead_ends
-        # print(dead_ends)
         list_distance = []
         distances = []
         x1, y1 = self.start_hero_pos
@@ -115,18 +111,12 @@ class Maze(MazeGenerator):
             x2, y2 = dead_ends[i]
             distances.append(abs(x2 - x1) + abs(y2))
             list_distance.append(100 * (abs(x2 - x1) + abs(y2 - y1)))
-            # print(list_distance)
             if i > 0:
                 list_distance[i] += list_distance[i - 1]
 
         a = randint(0, list_distance[-1])
-        # print(list_distance)
-        # print(distances)
-        # print(f"a: {a} list_distance: {list_distance[-1]}")
-        # print(x1, y1)
         for i in range(len(list_distance)):
             if a <= list_distance[i]:
-                # return dead_ends[i]
                 return dead_ends[i]
 
 

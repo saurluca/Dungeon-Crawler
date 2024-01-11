@@ -24,7 +24,7 @@ SOUND_ON = True
 
 class Game(arcade.Window):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler", center_window=True)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Dungeon Crawler", center_window=True, fullscreen = True)
         # # fullscreen = True
         # width, height = self.get_size()
         # self.set_viewport(0, width, 0, height)
