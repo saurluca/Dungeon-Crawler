@@ -19,6 +19,8 @@ class Level:
         self.num_food = num_food
         self.item_list = []
 
+        self.num_item = 0
+
         self.hero = hero
         self.maze = Maze(self.tile_num_x, self.tile_num_y, 3, 1)
 
@@ -77,9 +79,10 @@ class Level:
             self.maze.set_tile(x, y, "F")
 
     def generate_items(self):
-        x, y = self.maze.get_dead_end()
-        self.maze.set_tile(x, y, "I")
-        self.item_list.append(Weapon(x, y, 10))
+        for i in range(self.num_item):
+            pos = self.maze.get_free_tile()
+            self.maze.set_tile(*pos, )
+            self.item_list.append(Weapon(*pos, 10))
 
     def move_hero(self, dx, dy):
         cx, cy = self.hero.get_position()

@@ -65,8 +65,15 @@ reached level: 1
 in: 1.6s
 score of: 1/20
 ---
+<<<<<<< Updated upstream
 red
 reached level: 1
 in: 3.0s
 num_coins_collected of: 0/20
+=======
+player 
+reached level: 6
+in: 223.4s
+score of: 177/265
+>>>>>>> Stashed changes
 ---
