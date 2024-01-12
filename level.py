@@ -7,9 +7,6 @@ from enemy import Enemy
 BASE_HP_LOSS = 0.01
 
 
-# TODO rework pos and x and y
-
-
 class Level:
     def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_coins_collected, num_food, num_enemies):
         self.tile_num_x = tile_num_x

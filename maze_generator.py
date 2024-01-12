@@ -144,6 +144,15 @@ def generate_growing_tree_maze(tile_num_x, tile_num_y, recursive_weight=3, rando
     return grid
 
 
+def calculate_open_tiles(grid, dead_ends, tile_num_x, tile_num_y):
+    open_tiles = []
+    for x in range(tile_num_x):
+        for y in range(tile_num_y):
+            if grid[x][y] == "." and (x, y) not in dead_ends:
+                open_tiles.append((x, y))
+    return open_tiles
+
+
 def check_dead_end(x, y, grid):
     if grid[x][y] == ".":
         open_tiles = 0
@@ -153,7 +162,7 @@ def check_dead_end(x, y, grid):
         return open_tiles == 1
 
 
-def search_dead_ends(tile_num_x, tile_num_y, grid):
+def search_dead_ends(grid, tile_num_x, tile_num_y):
     dead_ends = []
     for x in range(tile_num_x):
         for y in range(tile_num_y):

@@ -67,10 +67,11 @@ class Game(arcade.Window):
         tile_num_x = 15 + self.levels_played * 2
         tile_num_y = 15 + self.levels_played * 2
 
-        # TODO take value from open tiles maze
+        # TODO take value from maze.open_tiles
         # TODO put into level
         # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
-        num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1)
+        num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1) - 1
+        print(num_open_tiles)
 
         num_coins = num_open_tiles // 8
         num_food = num_open_tiles // 24

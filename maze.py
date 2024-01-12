@@ -1,6 +1,6 @@
 import time
 from random import choice, randint
-from maze_generator import generate_growing_tree_maze, search_dead_ends
+from maze_generator import generate_growing_tree_maze, search_dead_ends, calculate_open_tiles
 
 
 class Maze:
@@ -10,22 +10,13 @@ class Maze:
 
         self.grid = generate_growing_tree_maze(tile_num_x, tile_num_y, recursive_weight, random_weight)
 
-        self.dead_ends = search_dead_ends(tile_num_x, tile_num_y, self.grid)
-        self.unused_dead_ends = self.dead_ends
-
-        self.free_tiles = []
-        self.set_free_tiles()
+        self.unused_dead_ends = search_dead_ends(self.grid, tile_num_x, tile_num_y)
+        self.free_tiles = calculate_open_tiles(self.grid, self.unused_dead_ends, tile_num_x, tile_num_y)
 
         self.start_hero_pos = self.get_dead_end()
 
     def __call__(self, x, y):
         return str(self.grid[x][y])
-
-    def set_free_tiles(self):
-        for x in range(self.tile_num_y):
-            for y in range(self.tile_num_x):
-                if self.grid[x][y] == "." and (x, y) not in self.dead_ends:
-                    self.free_tiles.append((x, y))
 
     def set_tile(self, x, y, thing):
         self.grid[x][y] = thing
@@ -39,17 +30,9 @@ class Maze:
         else:
             self.grid[x][y] = "."
 
-    def move_object_by(self, x, y, x_direction, y_direction):
-        self.grid[x + x_direction][y + y_direction] = self.grid[x][y]
-        self.grid[x][y] = "."
-
-    # old version
-    # def check_obstacle2(self, x, y):
-    #     return not (self.grid[x][y] == "#" or str(self.grid[x][y]) == "E")
-
+    # TODO enemies should not collide with items etc, in order for them not to get erased
     # tiles that are not walk through
     blockers = set("#HE")
-    # TODO enemies should not collide with items etc, in order for them not to get erased
 
     def check_obstacle(self, x, y):
         return not self.blockers & set(str(self.grid[x][y]))
@@ -63,11 +46,7 @@ class Maze:
                 print(tile, end="")
             print("")
 
-    def get_free_tile(self):
-        free_tile = choice(self.free_tiles)
-        self.free_tiles.remove(free_tile)
-        return free_tile
-
+    # open tiles an enemy could walk to
     def get_viable_tiles(self, x, y):
         viable_tiles = []
         for dx, dy in ((-1, 0), (0, -1), (1, 0), (0, 1)):
@@ -79,6 +58,11 @@ class Maze:
         dead_end = choice(self.unused_dead_ends)
         self.unused_dead_ends.remove(dead_end)
         return dead_end
+
+    def get_free_tile(self):
+        free_tile = choice(self.free_tiles)
+        self.free_tiles.remove(free_tile)
+        return free_tile
 
     # only an approximation of distance, not actual walk distance
     # TODO fuck you break
