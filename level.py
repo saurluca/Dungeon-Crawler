@@ -5,43 +5,46 @@ from weapon import Weapon
 from enemy import Enemy
 
 BASE_HP_LOSS = 0.01
+COIN_RATIO = 7
+ITEM_RATIO = 50
+FOOD_RATIO = 24
+ENEMY_RATIO = 50
 
 
 class Level:
-    def __init__(self, hero, tile_num_x, tile_num_y, num_coins, num_coins_collected, num_food, num_enemies):
+    def __init__(self, hero, tile_num_x, tile_num_y, num_coins_collected):
         self.tile_num_x = tile_num_x
         self.tile_num_y = tile_num_y
-        self.num_coins = num_coins
-        self.num_coins_collected = num_coins_collected
-        self.num_enemies = num_enemies
-        self.num_food = num_food
-        self.item_list = []
-
-        self.num_items = 0
 
         self.hero = hero
         self.maze = Maze(self.tile_num_x, self.tile_num_y, 3, 1)
 
-        self.enemy_lst = []
-
         self.hero.set_position(self.maze.start_hero_pos)
         self.maze.set_tile(*self.hero.get_position(), self.hero)
+
+        # does not include dead_ends
+        self.num_open_tiles = len(self.maze.free_tiles)
+
+        self.num_enemies = self.num_open_tiles // ENEMY_RATIO
+        self.num_food = self.num_open_tiles // FOOD_RATIO
+        self.num_items = self.num_open_tiles // ITEM_RATIO
+        self.num_coins = self.num_open_tiles // COIN_RATIO
+        self.num_coins_collected = num_coins_collected
+
+        self.item_list = []
+        self.enemy_lst = []
 
         self.uncovered_tiles = [[False for _ in range(self.tile_num_y)] for _ in range(self.tile_num_x)]
         self.fov = FieldOfView(self.maze, self.uncovered_tiles)
 
-        # has to be generated first
         self.generate_enemies()
-
         self.generate_coins()
-        self.new_coin_collected = False
-
         self.generate_food()
-        self.new_food_collected = False
-
         self.generate_items()
         self.generate_stair()
 
+        self.new_food_collected = False
+        self.new_coin_collected = False
         self.completed = False
 
     def generate_enemies(self):

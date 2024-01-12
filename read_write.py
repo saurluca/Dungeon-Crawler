@@ -8,6 +8,9 @@
 # TODO Idea: write a custom level builder
 # TODO idea: different type of maze, with connecting passages?
 
+# -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
+# num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1) - 1
+
 def write_down_stats(level, time, score, total_score):
     name = input("What's your name?\n")
     with open("score.txt", "a") as file:

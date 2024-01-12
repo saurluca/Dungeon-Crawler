@@ -13,7 +13,7 @@ SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 20 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = False
+I_SEE_EVERYTHING = True
 # no damage
 I_AM_INVINCIBLE = False
 # enables or disables diagonal movement
@@ -67,36 +67,31 @@ class Game(arcade.Window):
         tile_num_x = 15 + self.levels_played * 2
         tile_num_y = 15 + self.levels_played * 2
 
-        # TODO take value from maze.open_tiles
-        # TODO put into level
-        # -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
-        num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1) - 1
-        print(num_open_tiles)
+        # TODO decision: coins collected saved in hero, main, or level
 
-        num_coins = num_open_tiles // 8
-        num_food = num_open_tiles // 24
-        num_enemies = num_open_tiles // 24
-
-        self.total_num_coins += num_coins
-
-        self.level = Level(self.hero, tile_num_x, tile_num_y, num_coins, self.num_coins_collected, num_food, num_enemies)
+        self.level = Level(self.hero, tile_num_x, tile_num_y, self.num_coins_collected)
+        self.total_num_coins += self.level.num_coins
         self.renderer = Renderer(tile_num_x, tile_num_y, *self.hero.get_position(), self.level.enemy_lst, self.level.uncovered_tiles)
         self.ui.update(self.hero.get_hp(), self.hero.get_max_hp(), self.num_coins_collected, self.total_num_coins, self.levels_played)
 
+        # how chosen what to look at
         # initial rendering of tiles in view, see everything, every tile, duh
         if I_SEE_EVERYTHING:
-            every_tile = []
-            for x in range(tile_num_x):
-                for y in range(tile_num_y):
-                    every_tile.append((x, y))
-            self.level.uncovered_tiles = [[True for _ in range(tile_num_y)] for _ in range(tile_num_x)]
-            self.renderer.add_new_tiles_to_scene(self.level.add_tile_type(every_tile))
+            beginning_tiles = self.uncover_everything(tile_num_x, tile_num_y)
         else:
-            new_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
-            self.renderer.add_new_tiles_to_scene(new_tiles)
+            beginning_tiles = self.level.add_tile_type(self.level.get_newly_visible_tiles())
+        self.renderer.add_new_tiles_to_scene(beginning_tiles)
 
         if SOUND_ON:
             arcade.play_sound(self.start_sound, volume=0.5)
+
+    def uncover_everything(self, tile_num_x, tile_num_y):
+        every_tile = []
+        for x in range(tile_num_x):
+            for y in range(tile_num_y):
+                every_tile.append((x, y))
+        self.level.uncovered_tiles = [[True for _ in range(tile_num_y)] for _ in range(tile_num_x)]
+        return self.level.add_tile_type(every_tile)
 
     # if a key is pressed, changes movement speed in the pressed direction
     def on_key_press(self, key, modifiers):
