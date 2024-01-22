@@ -46,6 +46,7 @@ class Level:
         self.new_food_collected = False
         self.new_coin_collected = False
         self.completed = False
+        self.sprite_to_delete = None
 
     def generate_enemies(self):
         for i in range(self.num_enemies):
@@ -128,6 +129,7 @@ class Level:
                 self.completed = True
             # remove thing, set maze to empty tile
             self.maze.set_tile(*pos, ".")
+            self.sprite_to_delete = pos
 
     def update_items(self, pos):
         for item in self.item_list:

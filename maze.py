@@ -1,5 +1,13 @@
-import time
-from random import choice, randint
+
+
+"""
+    Maze generation and manipulation class. Objects in the maze are represented as strings
+    This class includes methods for dynamically generating a maze layout,
+    managing special tile positions such as hero start and stairs, and
+    interacting with tiles (e.g., checking for obstacles, moving entities).
+"""
+
+from random import choice
 from maze_generator import generate_growing_tree_maze, search_dead_ends, calculate_open_tiles
 
 
@@ -14,14 +22,72 @@ class Maze:
         self.free_tiles = calculate_open_tiles(self.grid, self.unused_dead_ends, tile_num_x, tile_num_y)
 
         self.start_hero_pos = self.get_dead_end()
+        self.stair_pos = self.generate_stair_pos()
 
     def __call__(self, x, y):
         return str(self.grid[x][y])
 
+    # approximates a distant position for the stair
+    def generate_stair_pos(self):
+        # A constant representing how many distant points to consider.
+        NUM_DISTANT_POINTS = 3
+        hero_x, hero_y = self.start_hero_pos
+        distant_points = []
+
+        # Evaluate all unused dead ends for their distance.
+        for dead_end_x, dead_end_y in self.unused_dead_ends:
+            # calculates the displacement between two points
+            distance = abs(dead_end_x - hero_x) + abs(dead_end_y - hero_y)
+            distant_points.append((distance, (dead_end_x, dead_end_y)))
+
+        # Sort the distant points by their distance, descending, and take the top points.
+        distant_points = sorted(distant_points, reverse=True)[:NUM_DISTANT_POINTS]
+
+        final_point = choice(distant_points)[1]
+        self.unused_dead_ends.remove(final_point)
+        return final_point
+
+    # open tiles an enemy could walk to
+    def get_viable_tiles(self, x, y):
+        viable_tiles = []
+        # checks in every direction
+        for dx, dy in ((-1, 0), (0, -1), (1, 0), (0, 1)):
+            if self.check_obstacle(x + dx, y + dy):
+                viable_tiles.append((x + dx, y + dy))
+        return viable_tiles
+
+    # returns a dead end in the maze, if there is at least one left
+    def get_dead_end(self):
+        if len(self.unused_dead_ends) >= 1:
+            dead_end = choice(self.unused_dead_ends)
+            self.unused_dead_ends.remove(dead_end)
+            return dead_end
+
+    # returns a tile that nothing is place on yet
+    def get_free_tile(self):
+        free_tile = choice(self.free_tiles)
+        self.free_tiles.remove(free_tile)
+        return free_tile
+
+    # used to calculate fov, checks if line of sight can go through a tile, i.e. is a wall
+    def check_see_through(self, x, y):
+        return not self.grid[x][y] == "#"
+
+    # things that are not walk through
+    blockers = set("#RGXCZH")
+
+    # check for collision, if either a wall, an enemy, or the hero
+    def check_obstacle(self, x, y):
+        return not bool(self.blockers & set(str(self.grid[x][y])))
+
     def set_tile(self, x, y, thing):
         self.grid[x][y] = thing
 
-    # TODO fix, coins and food moved by one tile if stepped on
+    # checks which enemy is fought, used for hero attack
+    def check_which_enemy(self, x, y):
+        return set(str(self.grid[x][y]))
+
+    # moves an entity from one position in the maze to another
     def move_entity(self, x, y, new_x, new_y):
         self.grid[new_x][new_y] = self.grid[x][y]
         # checks if the entity is standing on something
@@ -30,110 +96,10 @@ class Maze:
         else:
             self.grid[x][y] = "."
 
-    # TODO enemies should not collide with items etc, in order for them not to get erased
-    # tiles that are not walk through
-    blockers = set("#HE")
-
-    def check_obstacle(self, x, y):
-        return not self.blockers & set(str(self.grid[x][y]))
-
-    def check_see_through(self, x, y):
-        return not self.grid[x][y] == "#"
-
+    # prints out the maze and its content as a string, used when fixing bugs theoretical could play this way as well
     def print_out(self):
-        for row in self.grid:
-            for tile in row:
-                print(tile, end="")
+        for y in range(self.tile_num_y):
+            for x in range(self.tile_num_x):
+                print(self.grid[x][y], end="")
             print("")
-
-    # open tiles an enemy could walk to
-    def get_viable_tiles(self, x, y):
-        viable_tiles = []
-        for dx, dy in ((-1, 0), (0, -1), (1, 0), (0, 1)):
-            if self.check_obstacle(x + dx, y + dy):
-                viable_tiles.append((x + dx, y + dy))
-        return viable_tiles
-
-    def get_dead_end(self):
-        dead_end = choice(self.unused_dead_ends)
-        self.unused_dead_ends.remove(dead_end)
-        return dead_end
-
-    def get_free_tile(self):
-        free_tile = choice(self.free_tiles)
-        self.free_tiles.remove(free_tile)
-        return free_tile
-
-    # only an approximation of distance, not actual walk distance
-    # TODO fuck you break
-    def generate_stair_pos3(self):
-        long_len = 3
-        distant_points = [(0, (0, 0)) for _ in range(long_len)]
-        x1, y1 = self.start_hero_pos
-
-        for x2, y2 in self.unused_dead_ends:
-            distance = abs(x2 - x1) + abs(y2 - y1)
-            minimum = (min(self.tile_num_x, self.tile_num_y)) // 2
-            if distance > minimum and distance > distant_points[-1][0]:
-                for i in range(long_len):
-                    if distance > distant_points[i][0]:
-                        distant_points[i] = (distance, (x2, y2))
-                        break
-
-        # ensures distance not 0, because of default assignment
-        while True:
-            a = choice(distant_points)
-            if a[0] != 0:
-                return a[1]
-
-    def generate_stair_pos2(self):
-        """using the unused_dead_ends list this method returns an object of that list calculating the distances between the
-        dead_end and the Hero position increasing the chance of more distant dead_ends being chosen
-        """
-        dead_ends = self.unused_dead_ends
-        list_distance = []
-        distances = []
-        x1, y1 = self.start_hero_pos
-        for i in range(0, len(dead_ends)):
-            x2, y2 = dead_ends[i]
-            distances.append(abs(x2 - x1) + abs(y2))
-            list_distance.append(100 * (abs(x2 - x1) + abs(y2 - y1)))
-            if i > 0:
-                list_distance[i] += list_distance[i - 1]
-
-        a = randint(0, list_distance[-1])
-        for i in range(len(list_distance)):
-            if a <= list_distance[i]:
-                return dead_ends[i]
-
-
-def test1():
-    average = 0
-    n_times = 1000
-    for i in range(n_times):
-        maze = Maze(15, 15)
-        average += maze.generate_stair_pos3()
-    print(average / n_times)
-
-
-def test2():
-    total_time1 = 0
-    total_time2 = 0
-    n_times = 1000
-    for i in range(n_times):
-        maze = Maze(15, 15)
-        start_time = time.time()
-        maze.generate_stair_pos2()
-        total_time1 += time.time() - start_time
-    for i in range(n_times):
-        maze = Maze(15, 15)
-        start_time = time.time()
-        maze.generate_stair_pos3()
-        total_time2 += time.time() - start_time
-
-    print(100 * total_time1)
-    print(100 * total_time2)
-
-
-if __name__ == '__main__':
-    test2()
+        print("")

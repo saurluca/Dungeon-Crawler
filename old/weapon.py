@@ -6,6 +6,9 @@ class Weapon(Item):
         super().__init__(pos)
         self.damage = damage
 
+    def __str__(self):
+        return "W"
+
     def set_damage(self, damage):
         self.damage = damage
 

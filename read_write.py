@@ -1,15 +1,7 @@
-# TODO full screen
-# TODO why the hell getter and setter functions again?
+"""
+unused class. possible implementation: write down game stats in the end of a game in current_score.txt
+"""
 
-# TODO idea: write maze solving algorithm, to get good spots for spawning shit
-# TODO idea: read out stats
-# TODO idea: sort for high num_coins_collected, make list
-# TODO Idea, write a) programm that plays the game or b) write a reinforcement learning programm that place the game
-# TODO Idea: write a custom level builder
-# TODO idea: different type of maze, with connecting passages?
-
-# -2 because border, // to round, +1 to round up, x*y, grid, 2* because every free tile one connection
-# num_open_tiles = 2 * ((tile_num_x - 2) // 2 + 1) * ((tile_num_y - 2) // 2 + 1) - 1
 
 def write_down_stats(level, time, score, total_score):
     name = input("What's your name?\n")
@@ -19,13 +11,3 @@ def write_down_stats(level, time, score, total_score):
 
 if __name__ == '__main__':
     write_down_stats(2, 2, 2, 2)
-
-# remove coins all together and put items into dead ends?
-# easy to implement
-
-# make possible to have to things on one tile in maze. coins not object, so maybe easily possible?
-# advantage: can keep the coins
-
-# put items into the dead ends, coins not objects, tf can save enemy easily with coin
-
-
