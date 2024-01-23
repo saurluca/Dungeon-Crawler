@@ -11,7 +11,8 @@ import arcade
 
 POINT_RATIO_TO_OPEN_TILES = 3
 FOOD_RATIO_TO_OPEN_TILES = 40
-ENEMY_RATIO_TO_OPEN_TILES = 20
+ENEMY_RATIO_TO_OPEN_TILES = 13
+ENEMY_GROWTH = 1.05
 
 XP_PER_COIN = 3
 
@@ -57,7 +58,7 @@ class Floor:
         self.num_open_tiles = len(self.maze.free_tiles)
 
         # calculates num enemies, food, and possible points according to the floor and ratios set, increases enemy ratio per floor by 15% (1,15)
-        self.num_enemies = int((self.num_open_tiles / ENEMY_RATIO_TO_OPEN_TILES) * pow(1.15, on_floor) * difficulty)
+        self.num_enemies = int((self.num_open_tiles / ENEMY_RATIO_TO_OPEN_TILES) * pow(ENEMY_GROWTH, on_floor) * difficulty)
         self.points_on_floor = int((self.num_open_tiles // POINT_RATIO_TO_OPEN_TILES) * (self.difficulty / 2))
         self.num_food = self.num_open_tiles // FOOD_RATIO_TO_OPEN_TILES
 
@@ -95,22 +96,21 @@ class Floor:
     """
 
     def generate_enemies(self):
+        if self.on_floor >= 3:
+            self.possible_enemies = self.possible_enemies + ["C", "X"]
+
         for i in range(self.num_enemies):
             pos = self.maze.get_free_tile()
             while self.check_position_adjacent(*pos, self.hero.pos):  # ensures enemies don't spawn directly next to hero
                 pos = self.maze.get_free_tile()
             enemy_level = choice((0, 0, 0, 1, 1, 2)) + self.on_floor + self.difficulty - 1
 
-            # adds harder enemies on higher floors and removes easier ones
-            if self.on_floor == 3:
-                self.possible_enemies = self.possible_enemies + ["C", "X"]
-
             enemy_type = choice(self.possible_enemies)
 
             # on floor 3 and 5 spawn boss, the wizard
             if (self.on_floor == 3 or self.on_floor == 5) and i == self.num_enemies - 1:
                 enemy_type = "Z"
-                enemy_level = 2 + self.difficulty + self.on_floor
+                enemy_level = self.difficulty + self.on_floor
 
             enemy = Enemy(pos, enemy_level, enemy_type)  # sets up new enemy
             self.maze.set_tile(*pos, enemy)
@@ -298,8 +298,9 @@ class Floor:
     def enemies_attack(self):
         for enemy in self.enemy_lst:
             # if enemy is visible (includes alive), near the hero and invincibility not on, attack
-            if enemy.is_visible and self.check_position_adjacent(*enemy.pos, self.hero.pos) and not self.invincibility_on:
-                enemy.attack(self.hero)
+            if enemy.is_visible and self.check_position_adjacent(*enemy.pos, self.hero.pos):
+                if not self.invincibility_on:
+                    enemy.attack(self.hero)
                 enemy.attacked = True
 
     # sets enemy.is_visible if standing on an uncovered tiles and being alive

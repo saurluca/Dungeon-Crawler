@@ -5,19 +5,19 @@ Enemy is a subclass of Character that represents different enemy types in the ga
 
 from character import Character
 
-BASE_HP = 11  # Base hp of all enemy types
+BASE_HP = 10 # Base hp of all enemy types
 BASE_DAMAGE = 2.5  # base damage of all enemy types
 BASE_ARMOR = 1  # Base armor of all enemy types
-BASE_XP = 12    # Base xp on kill of all enemy types
+BASE_XP = 7    # Base xp on kill of all enemy types
 
 # additional hp per level
 HP_SCALING = 4
 # additional damage per level
-DAMAGE_SCALING = 1.6
+DAMAGE_SCALING = 1.2
 # additional armor per level
 ARMOR_SCALING = 1.25
 # additional xp per level
-XP_SCALING = 3.5
+XP_SCALING = 4
 
 
 class Enemy(Character):
@@ -43,22 +43,22 @@ class Enemy(Character):
 
         # spider, higher damage, little armor, less HP
         elif enemy_type == "X":
-            self.hp = int(0.5 * (BASE_HP + HP_SCALING * level))
+            self.hp = int(1 * (BASE_HP + HP_SCALING * level))
             self.damage = 2 * (BASE_DAMAGE + DAMAGE_SCALING * level)
             self.armor = int(1 * (BASE_ARMOR + ARMOR_SCALING * level))
             self.xp_on_kill = int(2.5 * (BASE_XP + XP_SCALING * level))
 
         # Cyclops, high damage, lots of armor, lots of HP
         elif enemy_type == "C":
-            self.hp = int(0.7 * (BASE_HP + HP_SCALING * level))
+            self.hp = int(0.8 * (BASE_HP + HP_SCALING * level))
             self.damage = 1.4 * (BASE_DAMAGE + DAMAGE_SCALING * level)
             self.armor = int(1.3 * (BASE_ARMOR + ARMOR_SCALING * level))
             self.xp_on_kill = int(3 * (BASE_XP + XP_SCALING * level))
 
         # wiZard, the BOSS
         elif enemy_type == "Z":
-            self.hp = int(2.5 * (BASE_HP + HP_SCALING * level))
-            self.damage = int(1.5 * (BASE_DAMAGE + DAMAGE_SCALING * level))
+            self.hp = int(1.4 * (BASE_HP + HP_SCALING * level))
+            self.damage = int(1.3 * (BASE_DAMAGE + DAMAGE_SCALING * level))
             self.armor = int(1 * (BASE_ARMOR + ARMOR_SCALING * level))
             self.xp_on_kill = int(7 * (BASE_XP + XP_SCALING * level))
 

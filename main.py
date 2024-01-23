@@ -16,15 +16,15 @@ from ui import UI
 TILE_SIZE = 32
 
 # height should be width +2, to accommodate the ui
-SCREEN_WIDTH = 19 * TILE_SIZE
-SCREEN_HEIGHT = 21 * TILE_SIZE
+SCREEN_WIDTH = 29 * TILE_SIZE
+SCREEN_HEIGHT = 31 * TILE_SIZE
 
 # cheat mode for full vision
 I_SEE_EVERYTHING = False
 # cheat mode for no damage
 I_AM_INVINCIBLE = False
 # enemies will move and not just attack
-MOVING_ENEMIES = True
+MOVING_ENEMIES = False
 # False: game designed to hold down keys, True: game designed to tap keys
 TAP_MOVEMENT_MODE = True
 
@@ -121,6 +121,9 @@ class Game(arcade.Window):
         # finish game when pressing escape, save current stats
         elif key == arcade.key.ESCAPE:
             self.stop_game()
+
+        elif key == arcade.key.P:
+            self.set_up_new_instance()
 
         if TAP_MOVEMENT_MODE:
             self.update_things(0)

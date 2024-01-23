@@ -12,10 +12,10 @@ FOOD_POINT_LOSS = 0.03
 # Percentage of food_points necessary to still regenerate hp
 FOOD_HEAL_THRESHOLD = 0.6
 FOOD_REGEN_COST = 0.1
-HP_REGEN = 0.4
+HP_REGEN = 1
 
 BASE_XP_NEEDED = 100
-XP_GROWTH_RATE = 1.4
+XP_GROWTH_RATE = 1.3
 
 DAMAGE_INCREASE = 1
 HP_INCREASE = 10
@@ -38,6 +38,10 @@ class Hero(Character):
 
         # list at index tracks xp need for level up
         self.xp_to_next_level = [0, BASE_XP_NEEDED]
+
+        # for i in range(3):
+        #     self.level_up()
+        # self.current_xp = self.xp_to_next_level[self.level - 1]
 
     # represents the Hero as a String as "H
     def __str__(self):
