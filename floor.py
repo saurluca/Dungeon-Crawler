@@ -11,7 +11,7 @@ import arcade
 
 POINT_RATIO_TO_OPEN_TILES = 3
 FOOD_RATIO_TO_OPEN_TILES = 40
-ENEMY_RATIO_TO_OPEN_TILES = 23
+ENEMY_RATIO_TO_OPEN_TILES = 20
 
 XP_PER_COIN = 3
 
@@ -132,15 +132,16 @@ class Floor:
 
     def generate_items(self, item, count):
         for i in range(count):
-            pos = self.maze.get_dead_end()
-            self.maze.set_tile(*pos, item)
+            if self.maze.check_dead_end_available():
+                pos = self.maze.get_dead_end()
+                self.maze.set_tile(*pos, item)
 
     def generate_weapons(self):
-        num_weapons = self.on_floor//2 + randint(1, 2)
+        num_weapons = self.on_floor//3 + 1
         self.generate_items("W", num_weapons)
 
     def generate_armor(self):
-        num_armor = self.on_floor//2 + randint(1, 2)
+        num_armor = self.on_floor//3 + 1
         self.generate_items("A", num_armor)
 
     def generate_potions(self):
@@ -252,8 +253,8 @@ class Floor:
         for delta_x, delta_y in move_checks:
             new_pos = (current_x + delta_x, current_y + delta_y)
 
-            # checks if there is an enemy to attack first
-            if self.check_collision_with_enemy(new_pos):
+            # checks if there is an enemy to attack first, second part is that he can not attack on diagonals
+            if self.check_collision_with_enemy(new_pos) and (delta_x == 0 or delta_y == 0):
                 self.hero_attack(new_pos)
                 break
 
@@ -273,33 +274,33 @@ class Floor:
                 pos = enemy.get_position()
                 viable_tiles = self.maze.get_viable_tiles(*pos)
 
-                # if hero directly adjacent, attack
-                if self.check_position_adjacent(*pos, self.hero.pos) and not self.invincibility_on:
-                    enemy.attack(self.hero)
-
                 # if the hero was directly adjacent, chase
-                elif self.check_position_adjacent(*pos, self.hero.last_pos):
+                if self.check_position_adjacent(*pos, self.hero.last_pos):
                     new_pos = self.hero.last_pos
                     # check if not another monster is already at this position, else waits a turn
                     if self.maze.check_obstacle(*new_pos):
                         enemy.set_position(new_pos)
                         enemy.standing_on = self.maze(*new_pos)
                         self.maze.move_entity(*pos, *new_pos)
+                    enemy.attacked = False
 
-                # random movement
+                # random movement not enemy.attacked and
                 # checks if the list of possible tiles is not empty, meaning no possible place to go to, else does not move
-                elif viable_tiles:
+                elif not enemy.attacked and viable_tiles:
                     new_pos = choice(viable_tiles)
                     tmp = self.maze(*new_pos)
                     self.maze.move_entity(*pos, *new_pos)
                     enemy.standing_on = tmp
                     enemy.set_position(new_pos)
 
+                    enemy.attacked = False
+
     def enemies_attack(self):
         for enemy in self.enemy_lst:
             # if enemy is visible (includes alive), near the hero and invincibility not on, attack
             if enemy.is_visible and self.check_position_adjacent(*enemy.pos, self.hero.pos) and not self.invincibility_on:
                 enemy.attack(self.hero)
+                enemy.attacked = True
 
     # sets enemy.is_visible if standing on an uncovered tiles and being alive
     def update_enemy_visibility(self):

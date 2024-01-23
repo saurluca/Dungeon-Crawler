@@ -21,10 +21,12 @@ SCREEN_HEIGHT = 21 * TILE_SIZE
 
 # cheat mode for full vision
 I_SEE_EVERYTHING = False
-# no damage
+# cheat mode for no damage
 I_AM_INVINCIBLE = False
-# static enemies, so they can't move, only attack
-STAND_STILL = True
+# enemies will move and not just attack
+MOVING_ENEMIES = True
+# False: game designed to hold down keys, True: game designed to tap keys
+TAP_MOVEMENT_MODE = True
 
 
 class Game(arcade.Window):
@@ -120,6 +122,9 @@ class Game(arcade.Window):
         elif key == arcade.key.ESCAPE:
             self.stop_game()
 
+        if TAP_MOVEMENT_MODE:
+            self.update_things(0)
+
     # if key is released, resets movement speed in that direction
     def on_key_release(self, key, modifiers):
         if key == arcade.key.RIGHT or key == arcade.key.D:
@@ -156,21 +161,28 @@ class Game(arcade.Window):
         # moves the hero
         self.floor.move_hero(self.hero_change_x, self.hero_change_y)
 
-        # every 4 ticks, reduces food of hero, and heals him at the cost of some food points if possible
+        # reduces food of hero, and heals him at the cost of some food points if possible
         self.hero.food_decay(self.on_floor, I_AM_INVINCIBLE)
-        if self.num_tick % 4 == 0:
-            self.hero.food_heal()
+        self.hero.food_heal()
 
         # Update visibility of tiles, if fog of war is enabled
         if not I_SEE_EVERYTHING:
             new_tiles = self.floor.add_tile_type(self.floor.get_newly_visible_tiles())
             self.renderer.add_new_tiles_to_scene(new_tiles)
 
-        # updates enemies every 4th tick, so they don't move to fast
-        if STAND_STILL and self.num_tick % 2 == 0:
+        if TAP_MOVEMENT_MODE:
+            # in tap mode enemies attack every turn
             self.floor.enemies_attack()
-        elif self.num_tick % 4 == 0:
-            self.floor.move_enemies()
+            if MOVING_ENEMIES:
+                # moves enemies if they are supposed to be moved
+                self.floor.move_enemies()
+
+        elif self.num_tick % 2 == 0:
+            # normal movement mode, enemies attack every 2 ticks to balance them
+            self.floor.enemies_attack()
+            if MOVING_ENEMIES and self.num_tick % 4 == 0:
+                # in normal movement mode, moves enemies every 4th turn, so they are not too fast
+                self.floor.move_enemies()
 
         self.floor.update_enemy_visibility()
         self.renderer.update_enemy_sprites(self.floor.enemy_lst)
@@ -196,7 +208,8 @@ def main():
     # game.floor.maze.print_out()
 
     # gets called every 1/8 of a second
-    arcade.schedule(game.update_things, 1 / 8)
+    if not TAP_MOVEMENT_MODE:
+        arcade.schedule(game.update_things, 1 / 8)
 
     arcade.run()
 

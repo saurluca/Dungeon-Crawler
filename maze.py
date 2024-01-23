@@ -56,6 +56,12 @@ class Maze:
                 viable_tiles.append((x + dx, y + dy))
         return viable_tiles
 
+    # returns a tile that nothing is place on yet
+    def get_free_tile(self):
+        free_tile = choice(self.free_tiles)
+        self.free_tiles.remove(free_tile)
+        return free_tile
+
     # returns a dead end in the maze, if there is at least one left
     def get_dead_end(self):
         if len(self.unused_dead_ends) >= 1:
@@ -63,11 +69,8 @@ class Maze:
             self.unused_dead_ends.remove(dead_end)
             return dead_end
 
-    # returns a tile that nothing is place on yet
-    def get_free_tile(self):
-        free_tile = choice(self.free_tiles)
-        self.free_tiles.remove(free_tile)
-        return free_tile
+    def check_dead_end_available(self):
+        return len(self.unused_dead_ends) >= 1
 
     # used to calculate fov, checks if line of sight can go through a tile, i.e. is a wall
     def check_see_through(self, x, y):

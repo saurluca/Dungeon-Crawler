@@ -12,12 +12,15 @@ FOOD_POINT_LOSS = 0.03
 # Percentage of food_points necessary to still regenerate hp
 FOOD_HEAL_THRESHOLD = 0.6
 FOOD_REGEN_COST = 0.1
+HP_REGEN = 0.4
+
 BASE_XP_NEEDED = 100
 XP_GROWTH_RATE = 1.4
 
 DAMAGE_INCREASE = 1
 HP_INCREASE = 10
 MAX_POSSIBLE_HP = 300
+
 
 # for Jeelka
 ONE_PIECE = 1
@@ -106,4 +109,4 @@ class Hero(Character):
     def food_heal(self):
         if self.max_food_points * FOOD_HEAL_THRESHOLD <= self.food_points and self.hp != self.max_hp:
             self.food_points -= FOOD_REGEN_COST
-            self.hp = min(self.max_hp, self.hp + ONE_PIECE)
+            self.hp = min(self.max_hp, self.hp + HP_REGEN)
