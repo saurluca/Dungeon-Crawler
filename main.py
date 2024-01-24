@@ -16,8 +16,8 @@ from ui import UI
 TILE_SIZE = 32
 
 # height should be width +2, to accommodate the ui
-SCREEN_WIDTH = 29 * TILE_SIZE
-SCREEN_HEIGHT = 31 * TILE_SIZE
+SCREEN_WIDTH = 19 * TILE_SIZE
+SCREEN_HEIGHT = 21 * TILE_SIZE
 
 # cheat mode for full vision
 I_SEE_EVERYTHING = False
@@ -68,7 +68,7 @@ class Game(arcade.Window):
 
     # this function sets up a new level every time the player finds the exit
     def set_up_new_instance(self):
-        # short none audible sound to start up soundplayer
+        # short none audible sound to start up sound player
         if self.on_floor == 0:
             arcade.play_sound(self.start_sound)
         else:
