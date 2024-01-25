@@ -5,10 +5,10 @@ Enemy is a subclass of Character that represents different enemy types in the ga
 
 from character import Character
 
-BASE_HP = 8 # Base hp of all enemy types
+BASE_HP = 9  # Base hp of all enemy types
 BASE_DAMAGE = 2.5  # base damage of all enemy types
 BASE_ARMOR = 1  # Base armor of all enemy types
-BASE_XP = 7    # Base xp on kill of all enemy types
+BASE_XP = 7  # Base xp on kill of all enemy types
 
 # additional hp per level
 HP_SCALING = 4
