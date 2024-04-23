@@ -29,7 +29,7 @@ COLLECTABLE_TYPES = "cFAWPD"  # sets collectable types
 
 
 class Floor:
-    def __init__(self, hero, on_floor, difficulty, tile_num_x, tile_num_y, current_score, invincibility_cheat_mode):
+    def __init__(self, hero, on_floor, difficulty, tile_num_x, tile_num_y, current_score, invincibility_cheat_mode, GENERATE_ENEMIES):
         self.hero = hero
         self.on_floor = on_floor
         self.difficulty = difficulty
@@ -58,7 +58,10 @@ class Floor:
         self.num_open_tiles = len(self.maze.free_tiles)
 
         # calculates num enemies, food, and possible points according to the floor and ratios set, increases enemy ratio per floor by 15% (1,15)
-        self.num_enemies = int((self.num_open_tiles / ENEMY_RATIO_TO_OPEN_TILES) * pow(ENEMY_GROWTH, on_floor) * difficulty)
+        if GENERATE_ENEMIES:
+            self.num_enemies = int((self.num_open_tiles / ENEMY_RATIO_TO_OPEN_TILES) * pow(ENEMY_GROWTH, on_floor) * difficulty)
+        else:
+            self.num_enemies = 0
         self.points_on_floor = int((self.num_open_tiles // POINT_RATIO_TO_OPEN_TILES) * (self.difficulty / 2))
         self.num_food = self.num_open_tiles // FOOD_RATIO_TO_OPEN_TILES
 

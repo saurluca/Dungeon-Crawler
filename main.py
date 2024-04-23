@@ -25,6 +25,8 @@ I_SEE_EVERYTHING = False
 I_AM_INVINCIBLE = False
 # enemies will move and not just attack
 MOVING_ENEMIES = False
+#enemies will not be generated
+GENERATE_ENEMIES = False
 # False: game designed to hold down keys, True: game designed to tap keys
 TAP_MOVEMENT_MODE = True
 
@@ -83,7 +85,7 @@ class Game(arcade.Window):
             self.tile_num_y += 2
 
         # initializes the Floor, Renderer, and ui
-        self.floor = Floor(self.hero, self.on_floor, self.difficulty, self.tile_num_x, self.tile_num_y, self.current_score, I_AM_INVINCIBLE)
+        self.floor = Floor(self.hero, self.on_floor, self.difficulty, self.tile_num_x, self.tile_num_y, self.current_score, I_AM_INVINCIBLE, GENERATE_ENEMIES)
         self.renderer = Renderer(self.tile_num_x, self.tile_num_y, *self.hero.get_position(), self.floor.enemy_lst, self.floor.uncovered_tiles)
 
         # Update the possible current_score the hero can achieve on this floor.
