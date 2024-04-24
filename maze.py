@@ -76,6 +76,9 @@ class Maze:
     def check_see_through(self, x, y):
         return not self.grid[x][y] == "#"
 
+    def is_wall(self, x, y):
+        return self.grid[x][y] == "#"
+
     # things that are not walk through
     blockers = set("#RGXCZH")
 

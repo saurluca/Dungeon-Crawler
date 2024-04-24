@@ -11,7 +11,7 @@ from hero import Hero
 from floor import Floor
 from renderer import Renderer
 from ui import UI
-# from read_write import write_down_stats
+from qlearning import Agent, World, State# from read_write import write_down_stats
 
 TILE_SIZE = 32
 
@@ -110,36 +110,10 @@ class Game(arcade.Window):
         self.floor.uncovered_tiles = [[True for _ in range(tile_num_y)] for _ in range(tile_num_x)]
         return self.floor.add_tile_type(every_tile)
 
-    # if a key is pressed, changes movement speed in the pressed direction
-    def on_key_press(self, key, modifiers):
-        if key == arcade.key.RIGHT or key == arcade.key.D:
-            self.hero_change_x = 1
-        elif key == arcade.key.LEFT or key == arcade.key.A:
-            self.hero_change_x = -1
-        elif key == arcade.key.UP or key == arcade.key.W:
-            self.hero_change_y = 1
-        elif key == arcade.key.DOWN or key == arcade.key.S:
-            self.hero_change_y = -1
-        # finish game when pressing escape, save current stats
-        elif key == arcade.key.ESCAPE:
-            self.stop_game()
+ #TODO Action
+    def Action(self):
+        pass
 
-        elif key == arcade.key.P:
-            self.set_up_new_instance()
-
-        if TAP_MOVEMENT_MODE:
-            self.update_things(0)
-
-    # if key is released, resets movement speed in that direction
-    def on_key_release(self, key, modifiers):
-        if key == arcade.key.RIGHT or key == arcade.key.D:
-            self.hero_change_x = 0
-        elif key == arcade.key.LEFT or key == arcade.key.A:
-            self.hero_change_x = 0
-        elif key == arcade.key.UP or key == arcade.key.W:
-            self.hero_change_y = 0
-        elif key == arcade.key.DOWN or key == arcade.key.S:
-            self.hero_change_y = 0
 
     def stop_game(self):
         # draws death screen
@@ -209,11 +183,17 @@ class Game(arcade.Window):
 
 def main():
     game = Game()
-    print("hi")
     game.set_up_new_instance()
-    # game.floor.maze.print_out()
+    a = Agent(game.floor.maze, game.floor.hero)
+    game.floor.maze.print_out()
+    episodes = 100
+    a.Q_Learning(episodes)
 
-    # gets called every 1/8 of a second
+
+    #TODO a.plot(episodes)
+    #TODO a.showValues()
+
+# gets called every 1/8 of a second
     if not TAP_MOVEMENT_MODE:
         arcade.schedule(game.update_things, 1 / 8)
 

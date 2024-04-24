@@ -1,4 +1,68 @@
 import random
+class World:
+    """Represents the board. It's separated from the state because the board is static."""
+
+    def __init__(self, maze):
+        """Initialise the board."""
+        self.rows = maze.tile_num_y
+        self.cols = maze.tile_num_x
+        self.win = maze.stair_pos
+        self.maze = maze
+
+    def is_end(self, state):
+        """Return True if the state is a terminal state, False otherwise."""
+        return state == self.win
+
+    def reward(self, state):
+        if self.maze(*state) == "c":
+            return 1
+        elif self.maze(*state) == "#":
+            return -0.5
+        elif self.maze(*state) == "D":
+            return 10
+        else:
+            return -0.1
+
+    def next(self, state, action):
+        """Return the next state given the current state and action.
+
+        Actions:
+        w: up
+        s: down
+        a: left
+        d: right
+
+        State is a tuple (x, y) where x is the row and y is the column."""
+        x_pos = state[0]
+        y_pos = state[1]
+        if action == "w" and not self.maze.is_wall(x_pos - 1, y_pos):
+            return x_pos - 1, y_pos  # up
+        elif action == "s" and not self.maze.is_wall(x_pos + 1, y_pos):
+            return x_pos + 1, y_pos  # down
+        elif action == "a" and not self.maze.is_wall(x_pos, y_pos - 1):
+            return x_pos, y_pos - 1  # left
+        elif action == "d" and not self.maze.is_wall(x_pos, y_pos + 1):
+            return x_pos, y_pos + 1  # right
+        else:
+            return state
+class State:
+    """Represents a current state, can print the board with current position."""
+
+    def __init__(self, hero, world):
+        """Initialise the state."""
+        self.state = hero.pos
+        self.world = world
+        self.is_end = self.world.is_end(self.state)
+
+    def reward(self):
+        """Return the reward for the current state."""
+        return self.world.reward(self.state)
+
+    def next(self, action):
+        """Return the next state given the current state and action."""
+        return self.world.next(self.state, action)
+
+
 class Agent:
     """Implements a Q-learning agent in a grid world."""
 
@@ -12,8 +76,8 @@ class Agent:
 
         self.states = []
         self.actions = ["w", "s", "a", "d"]  # up, down, left, right
-        self.world = maze
-        self.state = hero.pos
+        self.world = World(maze)
+        self.state = State(hero, self.world)
 
         # set the learning and greedy values
         self.alpha = alpha  # learning rate
@@ -29,10 +93,11 @@ class Agent:
 
         # initalise all Q values across the board to 0
         self.Q = {}
-        for i in range(self.world.tile_num_y):
-            for j in range(self.world.tile_num_x):
+        for i in range(self.world.rows):
+            for j in range(self.world.cols):
                 for k in range(len(self.actions)):
                     self.Q[(i, j, k)] = 0
+
 
     def Action(self):
         """Choose an action based on epsilon-greedy policy, and move to the next state.
@@ -49,7 +114,7 @@ class Agent:
         if rnd > self.epsilon:
             # iterate through actions, find Q  value and choose best
             for k in self.actions:
-                i, j = self.state.state
+                i, j = self.state
                 next_reward = self.Q[(i, j, k)]
                 if next_reward >= max_next_reward:
                     action = k
@@ -70,7 +135,7 @@ class Agent:
 
         x = 0
         # each episode: Move until an end state is reached
-        while x < episodes:
+        while (x < episodes):
 
             if self.is_end:  # end state?
 
@@ -85,8 +150,8 @@ class Agent:
                     self.Q[(i, j, a)] = round(reward, 3)
 
                 # reset state
-                self.state = self.state.pos
-             #   self.is_end = self.state.is_end
+                self.state = State(world=self.state.world)
+                self.is_end = self.state.is_end
 
                 # set rewards to zero and iterate to next episode
                 self.rewards = 0
@@ -121,4 +186,3 @@ class Agent:
 
             # copy new Q values to Q table
             # self.Q = self.new_Q.copy()
-
