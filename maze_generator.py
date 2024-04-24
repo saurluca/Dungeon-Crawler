@@ -5,7 +5,8 @@ backtracking algorithm.
 """
 
 from random import choice
-
+import random
+random.seed(5)
 
 # generates a 2D grid, alternating between walls "#" and open tiles ".", with a wall drawn around
 # used as a base for further generation, this way does not produce diagonal pathways
@@ -71,20 +72,20 @@ def generate_growing_tree_maze(tile_num_x, tile_num_y, recursive_weight=3, rando
     not_found = 0
     while i < num_free_tiles - 1:
         # Choose whether to proceed recursively or randomly based on weights
-        recursive = choice(weights)
+        recursive = random.choice(weights)
         if recursive:
             # this is similar to a recursive backtracking algorithm
             current_cell = visited[-1 - not_found]
         else:
             # this is similar to Prim's algorithm for maze generation
-            current_cell = choice(visited)
+            current_cell = random.choice(visited)
 
         # Determine unvisited neighbors of the current cell
         open_neighbors = check_unvisited_neighbors(current_cell, visited, tile_num_x, tile_num_y)
 
         # If there are unvisited neighbors, proceed to carve a path
         if open_neighbors:
-            next_cell = choice(open_neighbors)
+            next_cell = random.choice(open_neighbors)
             x, y = in_between(*current_cell, *next_cell)
             grid[x][y] = "."  # Carve the wall to create a path
             visited.append(next_cell)  # Add the new cell to the visited list
