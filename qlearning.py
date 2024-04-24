@@ -62,6 +62,21 @@ class State:
         """Return the next state given the current state and action."""
         return self.world.next(self.state, action)
 
+    def __repr__(self):
+        # print the board, . for empty space, X for hole, $ for win state, O for current position
+        out = '-' * (self.world.cols * 2 + 3) + '\n'
+        for i in range(0, self.world.rows):
+            out += '| '
+            for j in range(0, self.world.cols):
+                if (i, j) == self.state:
+                    out += 'H '
+                elif (i, j) == self.world.win:
+                    out += '$ '
+                else:
+                    out += '. '
+            out += '|\n'
+        out += '-' * (self.world.cols * 2 + 3) + '\n'
+        return out + f"Reward: {self.reward()}, is end: {self.is_end}"
 
 class Agent:
     """Implements a Q-learning agent in a grid world."""
@@ -161,6 +176,7 @@ class Agent:
                 max_next_value = -10
 
                 # get current state, next state, action and current reward
+                print(self.state)
                 next_state, action = self.Action()
                 i, j = self.state.state
                 reward = self.state.reward()
