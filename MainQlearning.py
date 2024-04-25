@@ -19,7 +19,7 @@ SCREEN_WIDTH = 19 * TILE_SIZE
 SCREEN_HEIGHT = 21 * TILE_SIZE
 
 # cheat mode for full vision
-I_SEE_EVERYTHING = False
+I_SEE_EVERYTHING = True
 # cheat mode for no damage
 I_AM_INVINCIBLE = False
 # enemies will move and not just attack
@@ -45,14 +45,14 @@ class Game(arcade.Window):
         self.floor = None
 
         # difficulty: 0 No enemies, 1 standard, 2 hard, 3 blood sweat and tears
-        self.difficulty = 1
+        self.difficulty = 0
         self.num_tick = 0
         self.on_floor = 0
         self.possible_score = 0
 
         # have to be odd, same value
-        self.tile_num_x = 17
-        self.tile_num_y = 17
+        self.tile_num_x = 9
+        self.tile_num_y = 9
 
         # instantiated as a list, so it has a pointer and can be changed in floor
         self.current_score = [0]
@@ -66,6 +66,8 @@ class Game(arcade.Window):
         self.you_died_sound = arcade.load_sound("Sounds/you_died.mp3")
 
         arcade.set_background_color(arcade.csscolor.BLACK)
+
+        self.agent = None
 
     # this function sets up a new level every time the player finds the exit
     def set_up_new_instance(self):
@@ -100,6 +102,9 @@ class Game(arcade.Window):
         else:
             beginning_tiles = self.floor.add_tile_type(self.floor.get_newly_visible_tiles())
         self.renderer.add_new_tiles_to_scene(beginning_tiles)
+
+        self.agent = Agent(self.floor.maze, self.hero)
+        self.floor.maze.print_out()
 
     # uncovers every tile in the maze, because per default tiles not rendered
     def uncover_everything(self, tile_num_x, tile_num_y):
@@ -183,10 +188,7 @@ class Game(arcade.Window):
 def main():
     game = Game()
     game.set_up_new_instance()
-    a = Agent(game.floor.maze, game.floor.hero)
-    game.floor.maze.print_out()
-    episodes = 100
-    a.Q_Learning(episodes)
+
 
     # TODO a.plot(episodes)
     # TODO a.showValues()
