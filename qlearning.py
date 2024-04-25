@@ -15,7 +15,7 @@ class World:
 
     def reward(self, state):
         if self.maze(*state) == "c":
-            return 1
+            return -0.1
         elif self.maze(*state) == "#":
             return -0.5
         elif self.maze(*state) == "D":
@@ -56,27 +56,12 @@ class State:
 
     def reward(self):
         """Return the reward for the current state."""
+        print(f"reward for current state: {self.world.reward(self.state)}")
         return self.world.reward(self.state)
 
     def next(self, action):
         """Return the next state given the current state and action."""
         return self.world.next(self.state, action)
-
-    def __repr__(self):
-        # print the board, . for empty space, X for hole, $ for win state, O for current position
-        out = '-' * (self.world.cols * 2 + 3) + '\n'
-        for i in range(0, self.world.rows):
-            out += '| '
-            for j in range(0, self.world.cols):
-                if (i, j) == self.state:
-                    out += 'H '
-                elif (i, j) == self.world.win:
-                    out += '$ '
-                else:
-                    out += '. '
-            out += '|\n'
-        out += '-' * (self.world.cols * 2 + 3) + '\n'
-        return out + f"Reward: {self.reward()}, is end: {self.is_end}"
 
 class Agent:
     """Implements a Q-learning agent in a grid world."""
@@ -88,7 +73,7 @@ class Agent:
         :param gamma = discount factor (future rewards)
         :param epsilon = probability of not following best action (epsilon-greedy strategy)
         """
-
+        self.hero = hero
         self.states = []
         self.actions = ["w", "s", "a", "d"]  # up, down, left, right
         self.world = World(maze)
@@ -110,7 +95,7 @@ class Agent:
         self.Q = {}
         for i in range(self.world.rows):
             for j in range(self.world.cols):
-                for k in range(len(self.actions)):
+                for k in self.actions:
                     self.Q[(i, j, k)] = 0
 
 
@@ -129,7 +114,7 @@ class Agent:
         if rnd > self.epsilon:
             # iterate through actions, find Q  value and choose best
             for k in self.actions:
-                i, j = self.state
+                i, j = self.state.state
                 next_reward = self.Q[(i, j, k)]
                 if next_reward >= max_next_reward:
                     action = k
@@ -150,7 +135,7 @@ class Agent:
 
         x = 0
         # each episode: Move until an end state is reached
-        while (x < episodes):
+        while x < episodes:
 
             if self.is_end:  # end state?
 
@@ -165,24 +150,24 @@ class Agent:
                     self.Q[(i, j, a)] = round(reward, 3)
 
                 # reset state
-                self.state = State(world=self.state.world)
+                self.state = State(self.hero, world=self.state.world)
                 self.is_end = self.state.is_end
 
                 # set rewards to zero and iterate to next episode
                 self.rewards = 0
+                print("new episode")
                 x += 1
             else:
                 # set to arbitrary low value to compare net state actions
                 max_next_value = -10
 
                 # get current state, next state, action and current reward
-                print(self.state)
                 next_state, action = self.Action()
                 i, j = self.state.state
                 reward = self.state.reward()
 
                 self.rewards += reward  # add reward to rewards for plot
-
+                print(self.rewards)
                 # iterate through actions to find max Q value for action based on next state action
                 for a in self.actions:
                     nextStateAction = (next_state[0], next_state[1], a)
@@ -192,13 +177,37 @@ class Agent:
                     # find largest Q value
                     if q_value >= max_next_value:
                         max_next_value = q_value
-
                 # next state is now current state, check if end state
-                self.state = State(state=next_state, world=self.state.world)
+                self.hero.pos = next_state
+                self.state = State(self.hero, world=self.state.world)
                 self.is_end = self.state.is_end
-
+                print(self.hero.pos)
                 # update Q values with max Q value for next state
                 self.Q[(i, j, action)] = round(max_next_value, 3)
 
             # copy new Q values to Q table
             # self.Q = self.new_Q.copy()
+def plot(self,episodes):
+
+        plt.plot(self.plot_reward)
+        plt.show()
+
+
+    #iterate through the board and find largest Q value in each, print output
+def showValues(self):
+    for i in range(0, self.state.world.rows):
+        print('-' * (self.state.world.cols * 11 +1))
+        out = '| '
+        for j in range(0, self.state.world.cols):
+            max_next_value = -10
+            best_action = -1
+            for a in self.actions:
+                next_value = self.Q[(i,j,a)]
+                if next_value >= max_next_value:
+                    max_next_value = next_value
+                    best_action = a
+            out += str(max_next_value).ljust(6)
+            out += ' ' + "^v<>"[best_action]
+            out += ' | '
+        print(out)
+    print('-' * (self.state.world.cols * 11 +1))
