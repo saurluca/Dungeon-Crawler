@@ -114,6 +114,7 @@ class Agent:
         if rnd > self.epsilon:
             # iterate through actions, find Q  value and choose best
             for k in self.actions:
+                print(self.state)
                 i, j = self.state
                 next_reward = self.Q[(i, j, k)]
                 if next_reward >= max_next_reward:

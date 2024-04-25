@@ -1,4 +1,3 @@
-
 """
  Game Class: Central control unit for the 'Dungeon Crawler' game. Initializes core components,
 such as the Hero, the graphical view, UI, renderer, and sound system. The Tick() function is the main game loop and
@@ -11,7 +10,7 @@ from hero import Hero
 from floor import Floor
 from renderer import Renderer
 from ui import UI
-from qlearning import Agent, World, State# from read_write import write_down_stats
+from qlearning import Agent, World, State  # from read_write import write_down_stats
 
 TILE_SIZE = 32
 
@@ -25,7 +24,7 @@ I_SEE_EVERYTHING = False
 I_AM_INVINCIBLE = False
 # enemies will move and not just attack
 MOVING_ENEMIES = False
-#enemies will not be generated
+# enemies will not be generated
 GENERATE_ENEMIES = False
 # False: game designed to hold down keys, True: game designed to tap keys
 TAP_MOVEMENT_MODE = True
@@ -85,7 +84,8 @@ class Game(arcade.Window):
             self.tile_num_y += 2
 
         # initializes the Floor, Renderer, and ui
-        self.floor = Floor(self.hero, self.on_floor, self.difficulty, self.tile_num_x, self.tile_num_y, self.current_score, I_AM_INVINCIBLE, GENERATE_ENEMIES)
+        self.floor = Floor(self.hero, self.on_floor, self.difficulty, self.tile_num_x, self.tile_num_y, self.current_score, I_AM_INVINCIBLE,
+                           GENERATE_ENEMIES)
         self.renderer = Renderer(self.tile_num_x, self.tile_num_y, *self.hero.get_position(), self.floor.enemy_lst, self.floor.uncovered_tiles)
 
         # Update the possible current_score the hero can achieve on this floor.
@@ -110,10 +110,9 @@ class Game(arcade.Window):
         self.floor.uncovered_tiles = [[True for _ in range(tile_num_y)] for _ in range(tile_num_x)]
         return self.floor.add_tile_type(every_tile)
 
- #TODO Action
+    # TODO Action
     def Action(self):
         pass
-
 
     def stop_game(self):
         # draws death screen
@@ -189,11 +188,10 @@ def main():
     episodes = 100
     a.Q_Learning(episodes)
 
+    # TODO a.plot(episodes)
+    # TODO a.showValues()
 
-    #TODO a.plot(episodes)
-    #TODO a.showValues()
-
-# gets called every 1/8 of a second
+    # gets called every 1/8 of a second
     if not TAP_MOVEMENT_MODE:
         arcade.schedule(game.update_things, 1 / 8)
 
