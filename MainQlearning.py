@@ -27,7 +27,7 @@ MOVING_ENEMIES = False
 # enemies will not be generated
 GENERATE_ENEMIES = False
 # False: game designed to hold down keys, True: game designed to tap keys
-TAP_MOVEMENT_MODE = True
+TAP_MOVEMENT_MODE = False
 
 
 class Game(arcade.Window):
@@ -103,7 +103,7 @@ class Game(arcade.Window):
             beginning_tiles = self.floor.add_tile_type(self.floor.get_newly_visible_tiles())
         self.renderer.add_new_tiles_to_scene(beginning_tiles)
 
-        self.agent = Agent(self.floor.maze, self.hero)
+        self.agent = Agent(self.floor.maze, self.hero, self.hero_change_x, self.hero_change_y)
         self.floor.maze.print_out()
 
     # uncovers every tile in the maze, because per default tiles not rendered
@@ -141,6 +141,8 @@ class Game(arcade.Window):
 
     # noinspection PyUnusedLocal
     def update_things(self, delta_time):
+        self.agent.Q_Learning_new()
+
         # moves the hero
         self.floor.move_hero(self.hero_change_x, self.hero_change_y)
 
@@ -188,7 +190,6 @@ class Game(arcade.Window):
 def main():
     game = Game()
     game.set_up_new_instance()
-
 
     # TODO a.plot(episodes)
     # TODO a.showValues()

@@ -1,4 +1,7 @@
 import random
+from matplotlib import pyplot as plt
+
+
 class World:
     """Represents the board. It's separated from the state because the board is static."""
 
@@ -45,6 +48,8 @@ class World:
             return x_pos, y_pos + 1  # right
         else:
             return state
+
+
 class State:
     """Represents a current state, can print the board with current position."""
 
@@ -63,10 +68,11 @@ class State:
         """Return the next state given the current state and action."""
         return self.world.next(self.state, action)
 
+
 class Agent:
     """Implements a Q-learning agent in a grid world."""
 
-    def __init__(self, maze, hero, alpha=0.5, gamma=0.9, epsilon=0.1):
+    def __init__(self, maze, hero, hero_new_x, hero_new_y, alpha=0.5, gamma=0.9, epsilon=0.1):
         """Initialize states and actions.
 
         :param alpha = learning rate (between 0 and 1)
@@ -74,6 +80,8 @@ class Agent:
         :param epsilon = probability of not following best action (epsilon-greedy strategy)
         """
         self.hero = hero
+        self.hero_new_x = hero_new_x
+        self.hero_new_y = hero_new_y
         self.states = []
         self.actions = ["w", "s", "a", "d"]  # up, down, left, right
         self.world = World(maze)
@@ -97,7 +105,6 @@ class Agent:
             for j in range(self.world.cols):
                 for k in self.actions:
                     self.Q[(i, j, k)] = 0
-
 
     def Action(self):
         """Choose an action based on epsilon-greedy policy, and move to the next state.
@@ -172,37 +179,92 @@ class Agent:
                 for a in self.actions:
                     nextStateAction = (next_state[0], next_state[1], a)
                     q_value = (1 - self.alpha) * self.Q[(i, j, action)] + self.alpha * (
-                                reward + self.gamma * self.Q[nextStateAction])
+                            reward + self.gamma * self.Q[nextStateAction])
 
                     # find largest Q value
                     if q_value >= max_next_value:
                         max_next_value = q_value
                 # next state is now current state, check if end state
-                self.hero.pos = next_state
+                self.hero_new_x, self.hero_new_y = next_state
+                print(self.hero_new_x, self.hero_new_y)
                 self.state = State(self.hero, world=self.state.world)
                 self.is_end = self.state.is_end
-                print(self.hero.pos)
+
                 # update Q values with max Q value for next state
                 self.Q[(i, j, action)] = round(max_next_value, 3)
 
-            # copy new Q values to Q table
-            # self.Q = self.new_Q.copy()
-def plot(self,episodes):
+    def Q_Learning_new(self):
+        """Q-Learning algorithm to find the best path through the grid.
 
-        plt.plot(self.plot_reward)
-        plt.show()
+        :param episodes: number of episodes to run the algorithm for.
+        :returns nothing"""
+
+        # each episode: Move until an end state is reached
+        if self.is_end:  # end state?
+            reward = self.state.reward()
+            self.rewards += reward
+            self.plot_reward.append(self.rewards)  # add accumulated rewards to plot
+
+            # get state, assign reward to each Q_value in state
+            i, j = self.state.state
+            for a in self.actions:
+                # self.new_Q[(i,j,a)] = round(reward,3)
+                self.Q[(i, j, a)] = round(reward, 3)
+
+            # reset state
+            self.state = State(self.hero, world=self.state.world)
+            self.is_end = self.state.is_end
+
+            # set rewards to zero and iterate to next episode
+            self.rewards = 0
+            print("new episode")
+        else:
+            # set to arbitrary low value to compare net state actions
+            max_next_value = -10
+
+            # get current state, next state, action and current reward
+            next_state, action = self.Action()
+            i, j = self.state.state
+            reward = self.state.reward()
+
+            self.rewards += reward  # add reward to rewards for plot
+            print(self.rewards)
+            # iterate through actions to find max Q value for action based on next state action
+            for a in self.actions:
+                nextStateAction = (next_state[0], next_state[1], a)
+                q_value = (1 - self.alpha) * self.Q[(i, j, action)] + self.alpha * (
+                        reward + self.gamma * self.Q[nextStateAction])
+
+                # find largest Q value
+                if q_value >= max_next_value:
+                    max_next_value = q_value
+            # next state is now current state, check if end state
+            self.hero.pos = next_state
+            self.state = State(self.hero, world=self.state.world)
+            self.is_end = self.state.is_end
+            print(self.hero.pos)
+            # update Q values with max Q value for next state
+            self.Q[(i, j, action)] = round(max_next_value, 3)
+
+        # copy new Q values to Q table
+        # self.Q = self.new_Q.copy()
 
 
-    #iterate through the board and find largest Q value in each, print output
+def plot(self, episodes):
+    plt.plot(self.plot_reward)
+    plt.show()
+
+
+# iterate through the board and find largest Q value in each, print output
 def showValues(self):
     for i in range(0, self.state.world.rows):
-        print('-' * (self.state.world.cols * 11 +1))
+        print('-' * (self.state.world.cols * 11 + 1))
         out = '| '
         for j in range(0, self.state.world.cols):
             max_next_value = -10
             best_action = -1
             for a in self.actions:
-                next_value = self.Q[(i,j,a)]
+                next_value = self.Q[(i, j, a)]
                 if next_value >= max_next_value:
                     max_next_value = next_value
                     best_action = a
@@ -210,4 +272,4 @@ def showValues(self):
             out += ' ' + "^v<>"[best_action]
             out += ' | '
         print(out)
-    print('-' * (self.state.world.cols * 11 +1))
+    print('-' * (self.state.world.cols * 11 + 1))
