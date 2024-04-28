@@ -27,6 +27,12 @@ class Maze:
     def __call__(self, x, y):
         return str(self.grid[x][y])
 
+    def get_tile_num_x(self):
+        return self.tile_num_x
+
+    def get_tile_num_y(self):
+        return self.tile_num_y
+
     # approximates a distant position for the stair
     def generate_stair_pos(self):
         # A constant representing how many distant points to consider.
