@@ -82,7 +82,7 @@ class Maze:
     # things that are not walk through
     blockers = set("#RGXCZH")
 
-    # check for collision, if either a wall, an enemy, or the hero
+    # check for collision, if either a wall, an enemy, or the hero. Returns True if there is an obstacle
     def check_obstacle(self, x, y):
         return not bool(self.blockers & set(str(self.grid[x][y])))
 

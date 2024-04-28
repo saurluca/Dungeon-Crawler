@@ -199,7 +199,7 @@ class Game(arcade.Window):
         self.num_tick += 1
 
         # if floor completed, go to next floor/ make new instance of everything
-        if self.floor.completed:
+        if self.floor.check_completed():
             self.set_up_new_instance()
 
         # if hero died, finish game

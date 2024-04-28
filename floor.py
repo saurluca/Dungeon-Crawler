@@ -204,6 +204,12 @@ class Floor:
     next come methods to move the hero and enemies and implement combat
     """
 
+    def check_obstacle(self, x, y):
+        return self.maze.check_obstacle(x, y)
+
+    def check_completed(self):
+        return self.completed
+
     # checks if the hero would collide with an enemy
     def check_collision_with_enemy(self, pos):
         """
@@ -259,16 +265,14 @@ class Floor:
             # checks if there is an enemy to attack first, second part is that he can not attack on diagonals
             if self.check_collision_with_enemy(new_pos) and (delta_x == 0 or delta_y == 0):
                 self.hero_attack(new_pos)
-                break
 
             # otherwise checks for a possible move
-            elif self.maze.check_obstacle(*new_pos):
+            elif self.check_obstacle(*new_pos):
                 # checks if for a collectable and then executes the effect
                 if self.check_for_collectables(new_pos):
                     self.execute_item_function(new_pos)
                 self.hero.set_position(new_pos)
                 self.maze.move_entity(current_x, current_y, *new_pos)
-                break
 
     # moves enemies and lets them attack
     def move_enemies(self):
@@ -281,7 +285,7 @@ class Floor:
                 if self.check_position_adjacent(*pos, self.hero.last_pos):
                     new_pos = self.hero.last_pos
                     # check if not another monster is already at this position, else waits a turn
-                    if self.maze.check_obstacle(*new_pos):
+                    if self.check_obstacle(*new_pos):
                         enemy.set_position(new_pos)
                         enemy.standing_on = self.maze(*new_pos)
                         self.maze.move_entity(*pos, *new_pos)
