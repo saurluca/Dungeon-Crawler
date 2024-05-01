@@ -261,10 +261,10 @@ class Floor:
 
         for delta_x, delta_y in move_checks:
             new_pos = (current_x + delta_x, current_y + delta_y)
-
             # checks if there is an enemy to attack first, second part is that he can not attack on diagonals
             if self.check_collision_with_enemy(new_pos) and (delta_x == 0 or delta_y == 0):
                 self.hero_attack(new_pos)
+                break
 
             # otherwise checks for a possible move
             elif self.check_obstacle(*new_pos):
@@ -273,6 +273,7 @@ class Floor:
                     self.execute_item_function(new_pos)
                 self.hero.set_position(new_pos)
                 self.maze.move_entity(current_x, current_y, *new_pos)
+                break
 
     # moves enemies and lets them attack
     def move_enemies(self):
