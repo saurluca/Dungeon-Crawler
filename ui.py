@@ -10,18 +10,19 @@ class UI:
         self.screen_height = screen_height
         self.screen_width = screen_width
         self.start_time = start_time
+        offset = self.screen_width / 5 + 24
 
         self.hp_text = arcade.Text("", 8, screen_height - 28, arcade.csscolor.GREEN, 18, bold=True)
-        self.score_text = arcade.Text("", 8 + 5 * tile_size + 16, screen_height - 28, arcade.csscolor.BLACK, 18)
-        self.on_floor = arcade.Text("", 8 + 10 * tile_size + 16, screen_height - 28, arcade.csscolor.BLACK, 18)
-        self.time_text = arcade.Text("", 8 + 13 * tile_size + 16, screen_height - 28, arcade.csscolor.BLACK, 18)
+        self.score_text = arcade.Text("", 8 + 11 * tile_size + 16 + offset, screen_height - 28, arcade.csscolor.BLACK, 18)
+        self.time_text = arcade.Text("", 8 + 5 * tile_size + 16,  screen_height - 28, arcade.csscolor.BLACK, 18)
 
+        self.on_floor = arcade.Text("", 8 + 12 * tile_size + 16, screen_height - 28, arcade.csscolor.BLACK, 18)
         self.food_text = arcade.Text("", 8, screen_height - 56, arcade.csscolor.DARK_RED, 18, bold=True)
-        self.damage_text = arcade.Text("", 8 + 4 * tile_size + 16, screen_height - 56, arcade.csscolor.BLACK, 18)
-        self.armor_text = arcade.Text("", 8 + 7 * tile_size + 16, screen_height - 56, arcade.csscolor.BLACK, 18)
+        self.damage_text = arcade.Text("", 8 + 11 * tile_size + 16 + offset, screen_height - 56, arcade.csscolor.BLACK, 18)
+        self.armor_text = arcade.Text("", 8 + 14 * tile_size + 16 + offset, screen_height - 56, arcade.csscolor.BLACK, 18)
 
-        self.level_text = arcade.Text("", 8 + 10 * tile_size + 16, screen_height - 56, arcade.csscolor.BLACK, 18)
-        self.xp_text = arcade.Text("", 8 + 13 * tile_size, screen_height - 56, arcade.csscolor.BLACK, 18)
+        self.level_text = arcade.Text("", 8 + 12 * tile_size + 16, screen_height - 56, arcade.csscolor.BLACK, 18)
+        self.xp_text = arcade.Text("", 8 + 5 * tile_size + 16, screen_height - 56, arcade.csscolor.BLACK, 18)
 
     def update(self, hero, current_score, possible_score, on_floor):
         self.update_hp_display(hero.hp, hero.max_hp)

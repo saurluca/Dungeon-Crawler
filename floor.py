@@ -86,14 +86,14 @@ class Floor:
             "P": lambda: self.potion_collected(),
             "D": lambda: self.stair_found()
         }
-
-        self.pick_up_sound = arcade.load_sound("Sounds/pick_me_up.mp3")
-        self.eating_sound = arcade.load_sound("Sounds/eating.mp3")
-        self.point_collected_sound = arcade.load_sound("Sounds/point.mp3")
-        self.hit_sound = arcade.load_sound("Sounds/hit.mp3")
-        self.potion_sound = arcade.load_sound("Sounds/potion.mp3")
-        self.level_up_sound = arcade.load_sound("Sounds/level_up.mp3")
-
+        #
+        # self.pick_up_sound = arcade.load_sound("Sounds/pick_me_up.mp3")
+        # self.eating_sound = arcade.load_sound("Sounds/eating.mp3")
+        # self.point_collected_sound = arcade.load_sound("Sounds/point.mp3")
+        # self.hit_sound = arcade.load_sound("Sounds/hit.mp3")
+        # self.potion_sound = arcade.load_sound("Sounds/potion.mp3")
+        # self.level_up_sound = arcade.load_sound("Sounds/level_up.mp3")
+        #
     """
     following are methods used to generate enemies and collectables on the floor
     """
@@ -171,30 +171,30 @@ class Floor:
         # stepping on a point, increases possible_score
         self.current_score[0] += 1
         self.hero.increase_xp(XP_PER_COIN)
-        arcade.play_sound(self.point_collected_sound, volume=0.5)
+        # arcade.play_sound(self.point_collected_sound, volume=0.5)
 
     def food_collected(self):
         # stepping on food increases hero's food bar
         self.hero.eat(FOOD_VALUE)
-        arcade.play_sound(self.eating_sound, volume=0.5)
+#         arcade.play_sound(self.eating_sound, volume=0.5)
 
     def weapon_collected(self):
         # stepping on a weapon increases the damage of the hero
         weapon_damage = randint(WEAPON_MIN_DAMAGE, WEAPON_MAX_DAMAGE)
         self.hero.increase_damage(weapon_damage)
-        arcade.play_sound(self.pick_up_sound, volume=0.5)
+#         arcade.play_sound(self.pick_up_sound, volume=0.5)
 
     def armor_collected(self):
         # stepping on armor increases the armor of the hero
         armor_value = randint(ARMOR_MIN_VALUE, ARMOR_MAX_VALUE)
         self.hero.increase_armor(armor_value)
-        arcade.play_sound(self.pick_up_sound, volume=0.5)
+#         arcade.play_sound(self.pick_up_sound, volume=0.5)
 
     def potion_collected(self):
         # stepping on a potion heals the hero
         heal_value = randint(POTION_MIN_HEAL, POTION_MAX_HEAL) + self.on_floor*5
         self.hero.heal(heal_value)
-        arcade.play_sound(self.potion_sound, volume=0.5)
+#         arcade.play_sound(self.potion_sound, volume=0.5)
 
     def stair_found(self):
         # stepping on the stair finishes the floor and transport the hero to the next
@@ -231,7 +231,7 @@ class Floor:
     def hero_attack(self, pos):
         enemy = self.get_enemy_from_list(pos)
         self.hero.attack(enemy)
-        arcade.play_sound(self.hit_sound, volume=0.5)
+#         arcade.play_sound(self.hit_sound, volume=0.5)
 
         # if the hero killed the enemy
         if not enemy.is_alive:
@@ -240,7 +240,7 @@ class Floor:
             # if hero has enough xp for level up, level up
             if self.hero.current_xp >= self.hero.xp_to_next_level[self.hero.level]:
                 self.hero.level_up()
-                arcade.play_sound(self.level_up_sound, volume=0.5)
+#                 arcade.play_sound(self.level_up_sound, volume=0.5)
 
             # removes the enemy from the maze
             self.maze.set_tile(*pos, enemy.standing_on)

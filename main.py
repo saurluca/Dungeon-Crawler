@@ -1,6 +1,6 @@
 """
  Game Class: Central control unit for the 'Dungeon Crawler' game. Initializes core components,
-such as the Hero, the graphical view, UI, renderer, and sound system. The Tick() function is the main game loop and
+# such as the Hero, the graphical view, UI, renderer, and sound system. The Tick() function is the main game loop and
 updates the game state
 """
 
@@ -16,8 +16,8 @@ from ui import UI
 TILE_SIZE = 32
 
 # height should be width +2, to accommodate the ui
-SCREEN_WIDTH = 19 * TILE_SIZE
-SCREEN_HEIGHT = 21 * TILE_SIZE
+SCREEN_WIDTH = 23 * TILE_SIZE
+SCREEN_HEIGHT = 25 * TILE_SIZE
 
 # cheat mode for full vision
 I_SEE_EVERYTHING = False
@@ -26,9 +26,9 @@ I_AM_INVINCIBLE = False
 # enemies will move and not just attack
 MOVING_ENEMIES = False
 # enemies will not be generated
-GENERATE_ENEMIES = False
+GENERATE_ENEMIES = True
 # False: game designed to hold down keys, True: game designed to tap keys
-TAP_MOVEMENT_MODE = True
+TAP_MOVEMENT_MODE = False
 
 
 class Game(arcade.Window):
@@ -52,8 +52,8 @@ class Game(arcade.Window):
         self.possible_score = 0
 
         # have to be odd, same value
-        self.tile_num_x = 17
-        self.tile_num_y = 17
+        self.tile_num_x = 23
+        self.tile_num_y = 23
 
         # instantiated as a list, so it has a pointer and can be changed in floor
         self.current_score = [0]
@@ -61,20 +61,20 @@ class Game(arcade.Window):
         self.hero_change_x = 0
         self.hero_change_y = 0
 
-        # preloads the sound files to decrease loading time later
-        self.start_sound = arcade.load_sound("Sounds/prepare_yourself.mp3")
-        self.next_floor_sound = arcade.load_sound("Sounds/next_floor.mp3")
-        self.you_died_sound = arcade.load_sound("Sounds/you_died.mp3")
+#         # preloads the sound files to decrease loading time later
+#         self.start_sound = arcade.load_sound("Sounds/prepare_yourself.mp3")
+#         self.next_floor_sound = arcade.load_sound("Sounds/next_floor.mp3")
+#         self.you_died_sound = arcade.load_sound("Sounds/you_died.mp3")
 
         arcade.set_background_color(arcade.csscolor.BLACK)
 
     # this function sets up a new level every time the player finds the exit
     def set_up_new_instance(self):
-        # short none audible sound to start up sound player
-        if self.on_floor == 0:
-            arcade.play_sound(self.start_sound)
-        else:
-            arcade.play_sound(self.next_floor_sound)
+#         # short none audible sound to start up sound player
+#         if self.on_floor == 0:
+#             arcade.play_sound(self.start_sound)
+#         else:
+#             arcade.play_sound(self.next_floor_sound)
 
         # keeps track of the floor/ levels played
         self.on_floor += 1
@@ -150,7 +150,7 @@ class Game(arcade.Window):
         arcade.Text("YOU DIED", SCREEN_HEIGHT // 4, SCREEN_WIDTH // 2, arcade.csscolor.RED, 50).draw()
         arcade.finish_render()
 
-        arcade.play_sound(self.you_died_sound, volume=0.5)
+#         arcade.play_sound(self.you_died_sound, volume=0.5)
 
         time.sleep(5)
         # write_down_stats(self.on_floor, round(time.time() - self.start_time, 1), self.num_coins_collected[0], self.possible_score)
